@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Maheshwari Identity | 404</title>
+    <meta
+      name="description"
+      content="A modern 404 page for Maheshwari Identity"
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="./css/style.css" />
+  </head>
+  <body>
+    <main class="page-shell not-found-page">
+      <section class="auth-card not-found-card" aria-labelledby="not-found-title">
+        <div class="not-found-illustration" aria-hidden="true">
+          <img src="./assets/maheshwari-identity-logo.svg" alt="" />
+        </div>
+
+        <p class="not-found-code">404</p>
+        <h1 id="not-found-title">Page Not Found</h1>
+        <p class="subtitle not-found-subtitle">
+          The page you are looking for might have moved or no longer exists.
+        </p>
+
+        <button class="primary-btn" id="homeBtn" type="button">Back to Home</button>
+      </section>
+    </main>
+
+    <script>
+      const homeButton = document.getElementById('homeBtn');
+      if (homeButton) {
+        homeButton.addEventListener('click', () => {
+          window.location.href = '/home';
+        });
+      }
+    </script>
+  </body>
+</html>

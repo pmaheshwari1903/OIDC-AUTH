@@ -1,5 +1,4 @@
 import ApiError from "../../common/utils/api-error.js"
-import ApiResponse from "../../common/utils/api-response.js"
 import { db, usersTable } from '../../common/db/index.js'
 import { eq } from "drizzle-orm"
 import * as bcrypt from "bcrypt"

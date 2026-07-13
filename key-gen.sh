@@ -10,6 +10,6 @@ openssl genpkey \
 openssl rsa \
     -in "$cert_file/private-key.pem" \
     -pubout \
-    -out "$cert_file/public-key.pub"
+    -out "$cert_file/public-key.pem"
 
 echo "Keys have been generated in the $cert_file/ folder"

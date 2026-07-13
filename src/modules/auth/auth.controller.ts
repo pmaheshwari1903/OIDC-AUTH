@@ -7,11 +7,11 @@ const showSignInPage = async (req: Request, res: Response) => {
 
 const signIn = async (req: Request, res: Response) => {
     try {
-        const {accessToken, user} = await authServices.signIn(req.body)
+        const { accessToken, user } = await authServices.signIn(req.body)
 
-        res.cookie("accessToken", accessToken,{
-            httpOnly:true,
-            secure:false,
+        res.cookie("accessToken", accessToken, {
+            httpOnly: true,
+            secure: false,
         })
 
         return res.status(200).json({
@@ -33,7 +33,7 @@ const signUp = async (req: Request, res: Response) => {
     try {
         const user = await authServices.signUp(req.body);
 
-        return res.status(200).json({
+        return res.status(201).json({
             message: "Sign Up Successfull",
             user
         })
@@ -58,6 +58,6 @@ export {
     signIn,
     showSignUpPage,
     signUp,
-    logout,
+    logout
 }
 

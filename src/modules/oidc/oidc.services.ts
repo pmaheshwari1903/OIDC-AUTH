@@ -1,5 +1,4 @@
-import ApiError from "../../common/utils/api-error.js"
-import ApiResponse from "../../common/utils/api-response.js"
+
 import { clientsTable, db, usersTable } from '../../common/db/index.js'
 import * as jose from 'node-jose'
 import { JWK } from '../../common/utils/cert.js'
@@ -15,6 +14,7 @@ const serviceDiscovery = async () => {
     return {
         issuer: ISSUER,
         authorization_endpoint: `${ISSUER}/authorize`,
+        token_endpoint: `${ISSUER}/token`,
         userinfo_endpoint: `${ISSUER}/userinfo`,
         jwks_uri: `${ISSUER}/.well-known/jwks.json`,
 
@@ -27,7 +27,7 @@ const serviceDiscovery = async () => {
         ],
 
         id_token_signing_alg_values_supported: [
-            "RZ256"
+            "RS256"
         ],
 
         scopes_supported: [
@@ -101,7 +101,7 @@ const authorize = async ({ client_id, redirect_uri, response_type, scope, state,
     }
 }
 
-const token = async({client_id, client_secret, shortCode, redirect_uri} : {client_id?: string, client_secret?: string, shortCode?: string, redirect_uri?: string}) => {
+const token = async ({ client_id, client_secret, code, redirect_uri }: { client_id?: string, client_secret?: string, code?: string, redirect_uri?: string }) => {
     if (!client_id) {
         throw new Error("client_id is required");
     }
@@ -110,7 +110,7 @@ const token = async({client_id, client_secret, shortCode, redirect_uri} : {clien
         throw new Error("client_secret is required");
     }
 
-    if (!shortCode) {
+    if (!code) {
         throw new Error("code is required");
     }
 
@@ -120,27 +120,27 @@ const token = async({client_id, client_secret, shortCode, redirect_uri} : {clien
 
     const [client] = await db.select().from(clientsTable).where(eq(clientsTable.clientId, client_id))
 
-    if(!client){
+    if (!client) {
         throw new Error("Invalid Client")
     }
 
     const hashedSecret = crypto.createHash('sha256').update(client_secret).digest('hex')
 
-    if(hashedSecret !== client.clientSecret){
+    if (hashedSecret !== client.clientSecret) {
         throw new Error("Invalid client secret")
     }
 
-    const authorizationCode = await findAuthorizationCode(shortCode)
+    const authorizationCode = await findAuthorizationCode(code)
 
-    if(authorizationCode.expiresAt < new Date()){
+    if (authorizationCode.expiresAt < new Date()) {
         throw new Error("Authorization Code Expired")
     }
 
-    if(authorizationCode.used){
+    if (authorizationCode.used) {
         throw new Error("Authorization code already used")
     }
 
-    if(authorizationCode.redirectUri !== redirect_uri){
+    if (authorizationCode.redirectUri !== redirect_uri) {
         throw new Error("Invalid redirect URI")
     }
 
@@ -149,7 +149,7 @@ const token = async({client_id, client_secret, shortCode, redirect_uri} : {clien
     }
 
     const accessToken = generateAccessToken({
-        id : authorizationCode.userId
+        id: authorizationCode.userId
     })
 
     const [user] = await db.select().from(usersTable).where(eq(usersTable.id, authorizationCode.userId));
@@ -161,9 +161,9 @@ const token = async({client_id, client_secret, shortCode, redirect_uri} : {clien
         family_name: user.lastName
     })
 
-    await markAuthorizationCodeUsed(shortCode)
+    await markAuthorizationCodeUsed(code)
 
-    return{
+    return {
         access_token: accessToken,
         id_token: idToken,
         token_type: "Bearer",
@@ -171,12 +171,12 @@ const token = async({client_id, client_secret, shortCode, redirect_uri} : {clien
     }
 }
 
-const userInfo = async(accessToken: string) => {
+const userInfo = async (accessToken: string) => {
     const payload = verifyAccessToken(accessToken) as JwtPayload
 
     const [user] = await db.select().from(usersTable).where(eq(usersTable.id, payload.id))
 
-    if(!user){
+    if (!user) {
         throw new Error("User Not Found")
     }
 

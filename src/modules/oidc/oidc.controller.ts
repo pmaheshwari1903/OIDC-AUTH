@@ -1,29 +1,31 @@
 import * as oidcServices from "./oidc.services.js"
 
-import {Request, Response} from 'express'
+import { Request, Response } from 'express'
 
-const serviceDiscovery = async(req : Request, res : Response) => {
+const serviceDiscovery = async (req: Request, res: Response) => {
     try {
         const discovery = await oidcServices.serviceDiscovery();
         return res.status(200).json(discovery)
     } catch (error) {
         console.error(error);
+        return res.status(500).json({ message: "Something went wrong" });
     }
 }
 
-const jwks = async(req : Request, res: Response) => {
+const jwks = async (req: Request, res: Response) => {
     try {
         const jwks = await oidcServices.jwks();
-        
+
         return res.status(200).json(jwks)
     } catch (error) {
         console.error(error);
+        return res.status(500).json({ message: "Something went wrong" });
     }
 }
 
-const authorize = async(req: Request, res: Response) => {
+const authorize = async (req: Request, res: Response) => {
     try {
-        const {shortCode, redirectUri: redirectUriFromService, state} = await oidcServices.authorize({
+        const { shortCode, redirectUri: redirectUriFromService, state } = await oidcServices.authorize({
             client_id: req.query.client_id as string,
             redirect_uri: req.query.redirect_uri as string,
             response_type: req.query.response_type as string,
@@ -35,8 +37,8 @@ const authorize = async(req: Request, res: Response) => {
         const redirectUri = state
             ? `${redirectUriFromService}?code=${shortCode}&state=${state}`
             : `${redirectUriFromService}?code=${shortCode}`
-        
-        return res.redirect(redirectUriFromService)
+
+        return res.redirect(redirectUri)
     } catch (error) {
         return res.status(400).json({
             message:
@@ -47,10 +49,10 @@ const authorize = async(req: Request, res: Response) => {
     }
 }
 
-const token = async(req: Request, res: Response) => {
+const token = async (req: Request, res: Response) => {
     try {
         const tokens = await oidcServices.token(req.body)
-        
+
         res.setHeader("Cache-Control", "no-store");
         res.setHeader("Pragma", "no-cache");
 
@@ -65,11 +67,11 @@ const token = async(req: Request, res: Response) => {
     }
 }
 
-const userInfo = async(req: Request, res: Response) => {
+const userInfo = async (req: Request, res: Response) => {
     try {
         const authorization = req.headers.authorization;
-        
-        if(!authorization){
+
+        if (!authorization) {
             return res.status(401).json({
                 message: "Authorization header is required",
             });
@@ -82,7 +84,7 @@ const userInfo = async(req: Request, res: Response) => {
         return res.status(200).json(user)
     } catch (error) {
         return res.status(401).json({
-            message : error instanceof Error ? error.message : "Something went wrong"
+            message: error instanceof Error ? error.message : "Something went wrong"
         })
     }
 }

@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Maheshwari Identity | Sign Up</title>
+    <meta
+      name="description"
+      content="Create a professional account with Maheshwari Identity"
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="./css/style.css" />
+  </head>
+  <body>
+    <main class="page-shell">
+      <section class="auth-card signup-card" aria-labelledby="signup-title">
+        <div class="brand-mark" aria-hidden="true">
+          <img src="./assets/maheshwari-identity-logo.svg" alt="" />
+        </div>
+
+        <h1 id="signup-title">Create account</h1>
+        <p class="subtitle">Join Maheshwari Identity with a secure and modern setup.</p>
+
+        <form class="sign-in-form sign-up-form" novalidate>
+          <div class="name-row">
+            <div class="field-group">
+              <label for="first-name">First Name</label>
+              <input
+                id="first-name"
+                name="firstName"
+                type="text"
+                autocomplete="given-name"
+                required
+              />
+              <p class="field-error" aria-live="polite"></p>
+            </div>
+
+            <div class="field-group">
+              <label for="last-name">Last Name</label>
+              <input
+                id="last-name"
+                name="lastName"
+                type="text"
+                autocomplete="family-name"
+                required
+              />
+              <p class="field-error" aria-live="polite"></p>
+            </div>
+          </div>
+
+          <div class="field-group">
+            <label for="email">Email</label>
+            <input id="email" name="email" type="email" autocomplete="email" required />
+            <p class="field-error" aria-live="polite"></p>
+          </div>
+
+          <div class="field-group">
+            <label for="password">Password</label>
+            <div class="password-wrap">
+              <input
+                id="password"
+                name="password"
+                type="password"
+                autocomplete="new-password"
+                required
+              />
+              <button type="button" class="password-toggle" data-target="password" aria-label="Show password">
+                Show
+              </button>
+            </div>
+            <p class="field-error" aria-live="polite"></p>
+          </div>
+
+          <div class="field-group">
+            <label for="confirm-password">Confirm Password</label>
+            <div class="password-wrap">
+              <input
+                id="confirm-password"
+                name="confirmPassword"
+                type="password"
+                autocomplete="new-password"
+                required
+              />
+              <button type="button" class="password-toggle" data-target="confirm-password" aria-label="Show password">
+                Show
+              </button>
+            </div>
+            <p class="field-error" aria-live="polite"></p>
+          </div>
+
+          <p class="helper-text">Use at least 8 characters with a number and a symbol.</p>
+
+          <button class="primary-btn" type="submit">Create Account</button>
+          <a class="text-btn" href="./sign-in.html">Already have an account? Sign In</a>
+        </form>
+
+        <p class="status-message" aria-live="polite"></p>
+
+        <footer class="footer-links">
+          <a href="#">Privacy</a>
+          <a href="#">Terms</a>
+        </footer>
+      </section>
+    </main>
+
+    <script src="./js/sign-up.js"></script>
+  </body>
+</html>

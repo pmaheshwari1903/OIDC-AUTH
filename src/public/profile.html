@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Maheshwari Identity | Profile</title>
+    <meta
+      name="description"
+      content="A modern profile dashboard for Maheshwari Identity"
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="./css/style.css" />
+  </head>
+  <body>
+    <main class="page-shell profile-page">
+      <section class="auth-card profile-card" aria-labelledby="profile-title">
+        <div class="profile-hero">
+          <div class="profile-avatar" aria-hidden="true">
+            <img src="./assets/maheshwari-identity-logo.svg" alt="" />
+          </div>
+          <div class="profile-identity">
+            <p class="profile-badge">Maheshwari Identity</p>
+            <h1 id="profile-title">Mahesh Maheshwari</h1>
+            <p class="subtitle profile-subtitle">Senior Product Designer</p>
+          </div>
+        </div>
+
+        <div class="profile-details">
+          <div class="detail-item">
+            <span class="detail-label">Email</span>
+            <span class="detail-value">mahesh@maheshwariidentity.com</span>
+          </div>
+          <div class="detail-item">
+            <span class="detail-label">User ID</span>
+            <span class="detail-value">MI-2048-91</span>
+          </div>
+        </div>
+
+        <div class="profile-actions">
+          <button class="primary-btn" id="logoutBtn" type="button">Logout</button>
+          <a class="text-btn disabled-btn" href="./sign-in.html">Back to Sign In</a>
+        </div>
+
+        <p class="status-message" id="profileStatus" aria-live="polite"></p>
+      </section>
+    </main>
+
+    <script src="./js/profile.js"></script>
+  </body>
+</html>

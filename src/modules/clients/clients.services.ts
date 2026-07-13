@@ -1,7 +1,4 @@
-import ApiError from "../../common/utils/api-error.js"
-import ApiResponse from "../../common/utils/api-response.js"
 import { db, clientsTable } from '../../common/db/index.js'
-import * as jose from 'node-jose'
 import { JWK } from '../../common/utils/cert.js'
 import crypto, { UUID } from 'node:crypto'
 import { generateSecretToken } from "../../common/utils/jwt.utils.js"
@@ -60,21 +57,21 @@ const getClients = async () => {
 
 const getClientById = async (id: string, body: any) => {
     const [clients] = await db.select().from(clientsTable).where(eq(clientsTable.id, id))
-    if(!clients) throw new Error("Client Not Found")
+    if (!clients) throw new Error("Client Not Found")
     return clients
 }
 
-const updateClient = async (id: string, {name, redirectUri}: { name?: string; redirectUri?: string }) => {
+const updateClient = async (id: string, { name, redirectUri }: { name?: string; redirectUri?: string }) => {
     const [existingClient] = await db.select().from(clientsTable).where(eq(clientsTable.id, id))
-    if(!existingClient) throw new Error("Client not Found")
-    
+    if (!existingClient) throw new Error("Client not Found")
+
     // Object for PATCH updates
     const updateData: {
         name?: string;
         redirectUri?: string;
     } = {};
 
-    
+
     if (name !== undefined) {
         if (!name.trim()) {
             throw new Error("Client name is required");
@@ -113,12 +110,12 @@ const updateClient = async (id: string, {name, redirectUri}: { name?: string; re
     return updatedClient
 }
 
-const deleteClient = async (id : string) => {
+const deleteClient = async (id: string) => {
     const [existingClient] = await db.select().from(clientsTable).where(eq(clientsTable.id, id))
-    if (!existingClient){
+    if (!existingClient) {
         throw new Error("Client not found")
     }
-    const deletedClient = await db.delete(clientsTable).where(eq(clientsTable.id,id)).returning()
+    const deletedClient = await db.delete(clientsTable).where(eq(clientsTable.id, id)).returning()
     return deletedClient
 }
 
