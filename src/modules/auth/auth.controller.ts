@@ -31,7 +31,12 @@ const showSignUpPage = async (req: Request, res: Response) => {
 
 const signUp = async (req: Request, res: Response) => {
     try {
-        const user = await authServices.signUp(req.body);
+        const { accessToken, user } = await authServices.signUp(req.body);
+
+        res.cookie("accessToken", accessToken, {
+            httpOnly: true,
+            secure: false, // Set to true in production with HTTPS
+        })
 
         return res.status(201).json({
             message: "Sign Up Successfull",

@@ -83,12 +83,20 @@ const signUp = async ({ firstName, lastName, profileImageUrl, email, password }:
         password: hashedPassword,
     }).returning()
 
-    return {
+    const accessToken = generateAccessToken({
         id: user.id,
-        firstName: user.firstName,
-        lastName: user.lastName,
-        email: user.email,
-        profileImageUrl: user.profileImageUrl,
+        email: user.email
+    })
+
+    return {
+        accessToken,
+        user: {
+            id: user.id,
+            firstName: user.firstName,
+            lastName: user.lastName,
+            email: user.email,
+            profileImageUrl: user.profileImageUrl,
+        }
     }
 }
 

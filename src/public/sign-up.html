@@ -108,6 +108,13 @@
       </section>
     </main>
 
+    <script>
+      // Preserve query string (OAuth payload) when navigating back to sign in
+      const signinLink = document.querySelector('a[href="./sign-in.html"]');
+      if (signinLink && window.location.search) {
+        signinLink.href = `./home${window.location.search}`;
+      }
+    </script>
     <script src="./js/sign-up.js"></script>
   </body>
 </html>

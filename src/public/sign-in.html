@@ -61,6 +61,13 @@
       </section>
     </main>
 
+    <script>
+      // Preserve query string (OAuth payload) when navigating to sign up
+      const signupLink = document.querySelector('a[href="./sign-up.html"]');
+      if (signupLink && window.location.search) {
+        signupLink.href = `./sign-up.html${window.location.search}`;
+      }
+    </script>
     <script src="./js/sign-in.js"></script>
   </body>
 </html>

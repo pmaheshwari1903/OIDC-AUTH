@@ -1,6 +1,10 @@
 import * as oidcServices from "./oidc.services.js"
 
 import { Request, Response } from 'express'
+import { verifyAccessToken } from '../../common/utils/jwt.utils.js'
+import { JwtPayload } from 'jsonwebtoken'
+import { db, usersTable } from '../../common/db/index.js'
+import { eq } from 'drizzle-orm'
 
 const serviceDiscovery = async (req: Request, res: Response) => {
     try {
@@ -25,13 +29,36 @@ const jwks = async (req: Request, res: Response) => {
 
 const authorize = async (req: Request, res: Response) => {
     try {
+        const token = req.cookies.accessToken;
+        const prompt = req.query.prompt as string;
+        const isForceLogin = prompt === 'login' || prompt === 'select_account';
+
+        if (!token || isForceLogin) {
+            // User not logged in or explicitly asked to choose account
+            const queryParams = new URLSearchParams(req.query as any);
+
+            // Delete prompt so when they redirect back from login to /authorize it doesn't loop
+            queryParams.delete('prompt');
+
+            const queryString = queryParams.toString();
+            return res.redirect(`/home?${queryString}`);
+        }
+
+        const payload = verifyAccessToken(token) as JwtPayload;
+
+        const [user] = await db.select().from(usersTable).where(eq(usersTable.id, payload.id));
+        if (!user) {
+            const queryString = new URLSearchParams(req.query as any).toString();
+            return res.redirect(`/home?${queryString}`);
+        }
+
         const { shortCode, redirectUri: redirectUriFromService, state } = await oidcServices.authorize({
             client_id: req.query.client_id as string,
             redirect_uri: req.query.redirect_uri as string,
             response_type: req.query.response_type as string,
             scope: req.query.scope as string,
             state: req.query.state as string | undefined,
-            userId: req.user.id,
+            userId: user.id,
         });
 
         const redirectUri = state

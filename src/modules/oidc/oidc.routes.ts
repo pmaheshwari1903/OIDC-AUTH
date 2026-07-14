@@ -6,7 +6,7 @@ const router = Router()
 
 router.get('/.well-known/openid-configuration', controller.serviceDiscovery)
 router.get('/.well-known/jwks.json', controller.jwks)
-router.get('/authorize', requireAuth, controller.authorize)
+router.get('/authorize', controller.authorize)
 router.post('/token', controller.token)
 router.get('/userinfo', controller.userInfo)
 

@@ -13,7 +13,7 @@ if (toggleButton) {
 }
 
 if (form) {
-  form.addEventListener('submit', (event) => {
+  form.addEventListener('submit', async (event) => {
     event.preventDefault();
 
     const email = document.getElementById('email').value.trim();
@@ -24,9 +24,35 @@ if (form) {
       return;
     }
 
-    statusMessage.textContent = `Welcome back, ${email}. Signing you in...`;
-    setTimeout(() => {
-      window.location.href = './profile.html';
-    }, 700);
+    try {
+      statusMessage.textContent = 'Signing you in...';
+      
+      const response = await fetch('/api/auth/sign-in', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password })
+      });
+      
+      const data = await response.json();
+      
+      if (!response.ok) {
+        throw new Error(data.message || 'Invalid credentials');
+      }
+      
+      statusMessage.textContent = `Welcome back, ${email}. Redirecting...`;
+      
+      setTimeout(() => {
+        // If there is query string, we are in an Oauth flow from /authorize!
+        // Redirect back to /authorize with same query so it generates code
+        if (window.location.search) {
+          window.location.href = `/authorize${window.location.search}`;
+        } else {
+          window.location.href = './profile.html';
+        }
+      }, 700);
+
+    } catch (err) {
+      statusMessage.textContent = err.message;
+    }
   });
 }

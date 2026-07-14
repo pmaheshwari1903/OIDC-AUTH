@@ -82,7 +82,7 @@ if (form) {
     });
   });
 
-  form.addEventListener('submit', (event) => {
+  form.addEventListener('submit', async (event) => {
     event.preventDefault();
 
     const inputs = form.querySelectorAll('input');
@@ -93,16 +93,39 @@ if (form) {
       return;
     }
 
-    const firstName = document.getElementById('first-name').value.trim();
-    statusMessage.textContent = `Account ready for ${firstName}. Welcome aboard!`;
-    setTimeout(() => {
-      window.location.href = './profile.html';
-    }, 700);
+    try {
+      statusMessage.textContent = 'Creating your account...';
+      const firstName = document.getElementById('first-name').value.trim();
+      const lastName = document.getElementById('last-name').value.trim();
+      const email = document.getElementById('email').value.trim();
+      const password = document.getElementById('password').value.trim();
+
+      const response = await fetch('/api/auth/sign-up', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ firstName, lastName, email, password })
+      });
+      
+      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data.message || 'Failed to create account');
+      }
+
+      statusMessage.textContent = `Account ready for ${firstName}. Redirecting...`;
+      setTimeout(() => {
+        if (window.location.search) {
+          window.location.href = `/authorize${window.location.search}`;
+        } else {
+          window.location.href = './profile.html';
+        }
+      }, 700);
+      
+    } catch (err) {
+      statusMessage.textContent = err.message;
+    }
+
     form.querySelectorAll('input').forEach((input) => {
       input.classList.remove('is-valid', 'is-invalid');
-    });
-    form.querySelectorAll('.field-error').forEach((error) => {
-      error.textContent = '';
     });
   });
 }
