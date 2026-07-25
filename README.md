@@ -310,7 +310,7 @@ app.get("/auth/callback", async (req, res) => {
 
 ## 📖 API Reference
 
-> **Base URL:** `https://oidc-auth-iota.vercel.app`
+> **Base URL:** `https://oidcauth.vercel.app`
 
 ### Discovery
 
