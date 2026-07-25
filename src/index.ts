@@ -31,6 +31,10 @@ app.get('/home', (req, res) => {
   res.sendFile(path.resolve('src/public/sign-in.html'));
 });
 
+app.get('/register', (req, res) => {
+  res.sendFile(path.resolve('src/public/register.html'));
+});
+
 app.use('/api/auth', authRoute)
 app.use('/api', clientRoute)
 app.use('/', oidcRoute)
@@ -39,6 +43,10 @@ app.use((req, res) => {
   res.status(404).sendFile(path.resolve('src/public/404.html'));
 });
 
-app.listen(PORT, () => {
-  console.log(`AuthServer is running on PORT ${PORT}`);
-});
+if (process.env.NODE_ENV !== 'production') {
+  app.listen(PORT, () => {
+    console.log(`AuthServer is running on PORT ${PORT}`);
+  });
+}
+
+export default app;

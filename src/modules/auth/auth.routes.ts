@@ -9,6 +9,7 @@ router.get('/sign-in', controller.showSignInPage)
 router.post('/sign-in', validateSignInRequest, controller.signIn)
 router.get('/sign-up', controller.showSignUpPage)
 router.post('/sign-up', validateSignUpRequest, controller.signUp)
+router.get('/verify-email', controller.verifyEmail)
 router.post('/logout', requireAuth, controller.logout)
 
 

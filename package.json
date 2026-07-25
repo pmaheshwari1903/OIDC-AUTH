@@ -7,18 +7,12 @@
     "db:migrate": "drizzle-kit migrate",
     "db:generate": "drizzle-kit generate",
     "db:studio": "drizzle-kit studio",
-    "dev": "tsc-watch --onSuccess \"node dist/index\""
+    "dev": "tsc-watch --onSuccess \"node dist/index\"",
+    "build": "tsc"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "devEngines": {
-    "packageManager": {
-      "name": "pnpm",
-      "version": "11.12.0",
-      "onFail": "download"
-    }
-  },
   "type": "module",
   "dependencies": {
     "@types/express": "^5.0.6",
@@ -31,6 +25,7 @@
     "express": "^5.2.1",
     "jsonwebtoken": "^9.0.3",
     "node-jose": "^2.2.0",
+    "nodemailer": "^9.0.3",
     "pg": "^8.22.0"
   },
   "devDependencies": {
@@ -38,6 +33,7 @@
     "@types/cookie-parser": "^1.4.10",
     "@types/node": "^26.1.1",
     "@types/node-jose": "^1.1.13",
+    "@types/nodemailer": "^8.0.1",
     "@types/pg": "^8.20.0",
     "drizzle-kit": "^0.31.10",
     "tsc-watch": "^7.2.1",

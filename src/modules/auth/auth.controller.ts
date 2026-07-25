@@ -58,11 +58,32 @@ const logout = async (req: Request, res: Response) => {
 }
 
 
+const verifyEmail = async (req: Request, res: Response) => {
+    try {
+        const token = req.query.token as string;
+        await authServices.verifyEmail(token);
+        return res.status(200).send(`
+            <div style="font-family: Arial, sans-serif; text-align: center; margin-top: 50px;">
+                <h1 style="color: #10b981;">Email Verified! ✅</h1>
+                <p>Your email has been successfully verified. You can now log into your account.</p>
+            </div>
+        `);
+    } catch (error) {
+        return res.status(400).send(`
+            <div style="font-family: Arial, sans-serif; text-align: center; margin-top: 50px;">
+                <h1 style="color: #ef4444;">Verification Failed ❌</h1>
+                <p>${error instanceof Error ? error.message : "Invalid token"}</p>
+            </div>
+        `);
+    }
+}
+
 export {
     showSignInPage,
     signIn,
     showSignUpPage,
     signUp,
-    logout
+    logout,
+    verifyEmail
 }
 

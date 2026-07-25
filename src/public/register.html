@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register Client | Auth Service</title>
+    <!-- Modern Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #0f172a;
+            --card-bg: rgba(30, 41, 59, 0.7);
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --accent: #3b82f6;
+            --accent-hover: #2563eb;
+            --input-bg: rgba(15, 23, 42, 0.6);
+            --border-color: rgba(255, 255, 255, 0.1);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            background-image: 
+                radial-gradient(circle at 15% 50%, rgba(59, 130, 246, 0.15) 0%, transparent 50%),
+                radial-gradient(circle at 85% 30%, rgba(139, 92, 246, 0.15) 0%, transparent 50%);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 500px;
+        }
+
+        .card {
+            background: var(--card-bg);
+            backdrop-filter: blur(12px);
+            border: 1px solid var(--border-color);
+            border-radius: 1rem;
+            padding: 2.5rem;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .header h1 {
+            font-size: 1.75rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(135deg, #60a5fa, #a78bfa);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .header p {
+            color: var(--text-muted);
+            font-size: 0.95rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-size: 0.9rem;
+            font-weight: 500;
+            color: var(--text-muted);
+        }
+
+        input[type="text"], input[type="url"] {
+            width: 100%;
+            padding: 0.875rem 1rem;
+            background: var(--input-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 0.5rem;
+            color: var(--text-main);
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+        }
+
+        button {
+            width: 100%;
+            padding: 1rem;
+            background: var(--accent);
+            color: white;
+            border: none;
+            border-radius: 0.5rem;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 0.5rem;
+        }
+
+        button:hover {
+            background: var(--accent-hover);
+            transform: translateY(-1px);
+        }
+
+        button:active {
+            transform: translateY(1px);
+        }
+
+        /* Result Box styles */
+        .result-box {
+            display: none;
+            margin-top: 2rem;
+            padding: 1.5rem;
+            background: rgba(16, 185, 129, 0.1);
+            border: 1px solid rgba(16, 185, 129, 0.2);
+            border-radius: 0.75rem;
+            animation: slideUp 0.4s ease-out forwards;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .result-box.error {
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid rgba(239, 68, 68, 0.2);
+        }
+
+        .result-box h3 {
+            font-size: 1.1rem;
+            margin-bottom: 1rem;
+            color: #10b981;
+        }
+
+        .result-box.error h3 {
+            color: #ef4444;
+        }
+
+        .credentials {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .credential-item {
+            background: var(--input-bg);
+            padding: 1rem;
+            border-radius: 0.5rem;
+            border: 1px solid var(--border-color);
+            position: relative;
+        }
+
+        .credential-label {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--text-muted);
+            margin-bottom: 0.25rem;
+        }
+
+        .credential-value {
+            font-family: monospace;
+            font-size: 0.95rem;
+            word-break: break-all;
+        }
+
+        .warning-text {
+            color: #fbbf24;
+            font-size: 0.85rem;
+            margin-top: 1rem;
+            text-align: center;
+        }
+        
+        .loading {
+            opacity: 0.7;
+            pointer-events: none;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <div class="card">
+            <div class="header">
+                <h1>Register Application</h1>
+                <p>Register a new OAuth client to get credentials</p>
+            </div>
+
+            <form id="registerForm">
+                <div class="form-group">
+                    <label for="appName">Application Name</label>
+                    <input type="text" id="appName" placeholder="e.g. My Awesome App" required />
+                </div>
+
+                <div class="form-group">
+                    <label for="redirectUri">Callback URL (Redirect URI)</label>
+                    <input type="url" id="redirectUri" placeholder="http://localhost:3000/api/auth/callback" required />
+                </div>
+
+                <button type="submit" id="submitBtn">Generate Credentials</button>
+            </form>
+
+            <div id="resultBox" class="result-box">
+                <!-- Results rendered via JS -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const form = document.getElementById('registerForm');
+        const submitBtn = document.getElementById('submitBtn');
+        const resultBox = document.getElementById('resultBox');
+
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const name = document.getElementById('appName').value;
+            const redirectUri = document.getElementById('redirectUri').value;
+
+            // Optional loading state
+            submitBtn.textContent = 'Generating...';
+            submitBtn.classList.add('loading');
+            resultBox.style.display = 'none';
+            resultBox.className = 'result-box';
+
+            try {
+                const response = await fetch('/api/clients', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ name, redirectUri })
+                });
+
+                const data = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(data.message || 'Failed to create client');
+                }
+
+                form.reset();
+
+                resultBox.innerHTML = `
+                    <h3>✅ Registration Successful!</h3>
+                    <div class="credentials">
+                        <div class="credential-item">
+                            <div class="credential-label">Client ID</div>
+                            <div class="credential-value">${data.client.clientId}</div>
+                        </div>
+                        <div class="credential-item">
+                            <div class="credential-label">Client Secret</div>
+                            <div class="credential-value">${data.client.clientSecret}</div>
+                        </div>
+                    </div>
+                    <p class="warning-text">⚠️ Please copy your Client Secret now. It will not be shown again.</p>
+                `;
+            } catch (err) {
+                resultBox.classList.add('error');
+                resultBox.innerHTML = `
+                    <h3>❌ Error</h3>
+                    <p>${err.message}</p>
+                `;
+            } finally {
+                resultBox.style.display = 'block';
+                submitBtn.textContent = 'Generate Credentials';
+                submitBtn.classList.remove('loading');
+            }
+        });
+    </script>
+</body>
+</html>

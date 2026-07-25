@@ -4,6 +4,7 @@ import { eq } from "drizzle-orm"
 import * as bcrypt from "bcrypt"
 import crypto from 'crypto'
 import { generateAccessToken, verifyAccessToken } from "../../common/utils/jwt.utils.js"
+import { sendVerificationEmail } from "../../common/utils/mailer.js"
 
 
 const hashToken = (token: string) => {
@@ -17,6 +18,8 @@ const showSignInPage = async () => {
 const signIn = async ({ email, password }: { email: string; password: string }) => {
     const [user] = await db.select().from(usersTable).where(eq(usersTable.email, email))
     if (!user) throw new Error("User Not Found")
+
+    if (!user.emailVerified) throw new Error("Please verify your email address to log in.")
 
     if (!user.password) throw new Error("Password not set")
     const isPasswordValid = await bcrypt.compare(password, user.password)
@@ -59,6 +62,10 @@ const signUp = async ({ firstName, lastName, profileImageUrl, email, password }:
         password: hashedPassword,
     }).returning()
 
+    // Send the Verification Email
+    const verificationToken = generateAccessToken({ id: user.id });
+    await sendVerificationEmail(user.email, verificationToken);
+
     const accessToken = generateAccessToken({
         id: user.id,
         email: user.email
@@ -76,9 +83,18 @@ const signUp = async ({ firstName, lastName, profileImageUrl, email, password }:
     }
 }
 
+const verifyEmail = async (token: string) => {
+    if (!token) throw new Error("No token provided");
+    const decoded = verifyAccessToken(token) as { id: string };
+    if (!decoded || !decoded.id) throw new Error("Invalid or expired token");
+
+    await db.update(usersTable).set({ emailVerified: true }).where(eq(usersTable.id, decoded.id));
+};
+
 export {
     showSignInPage,
     signIn,
     showSignUpPage,
-    signUp
+    signUp,
+    verifyEmail
 }
