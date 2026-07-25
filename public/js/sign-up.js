@@ -111,14 +111,10 @@ if (form) {
         throw new Error(data.message || 'Failed to create account');
       }
 
-      statusMessage.textContent = `Account ready for ${firstName}. Redirecting...`;
+      statusMessage.textContent = `Verification email sent to ${email}. Please check your inbox.`;
       setTimeout(() => {
-        if (window.location.search) {
-          window.location.href = `/authorize${window.location.search}`;
-        } else {
-          window.location.href = './profile.html';
-        }
-      }, 700);
+        window.location.href = `./sign-in.html${window.location.search}`;
+      }, 3000);
       
     } catch (err) {
       statusMessage.textContent = err.message;

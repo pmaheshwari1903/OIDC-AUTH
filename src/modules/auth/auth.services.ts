@@ -66,13 +66,7 @@ const signUp = async ({ firstName, lastName, profileImageUrl, email, password }:
     const verificationToken = generateAccessToken({ id: user.id });
     await sendVerificationEmail(user.email, verificationToken);
 
-    const accessToken = generateAccessToken({
-        id: user.id,
-        email: user.email
-    })
-
     return {
-        accessToken,
         user: {
             id: user.id,
             firstName: user.firstName,
