@@ -15,14 +15,6 @@ const showSignInPage = async () => {
 }
 
 const signIn = async ({ email, password }: { email: string; password: string }) => {
-    if (!email.trim()) {
-        throw new Error("Email is required");
-    }
-
-    if (!password.trim()) {
-        throw new Error("Password is required");
-    }
-
     const [user] = await db.select().from(usersTable).where(eq(usersTable.email, email))
     if (!user) throw new Error("User Not Found")
 
@@ -54,22 +46,6 @@ const showSignUpPage = async () => {
 }
 
 const signUp = async ({ firstName, lastName, profileImageUrl, email, password }: { firstName: string; lastName: string; profileImageUrl?: string; email: string; password: string; }) => {
-    if (!firstName.trim()) {
-        throw new Error("First name is required");
-    }
-
-    if (!lastName.trim()) {
-        throw new Error("Last name is required");
-    }
-
-    if (!email.trim()) {
-        throw new Error("Email is required");
-    }
-
-    if (!password.trim()) {
-        throw new Error("Password is required");
-    }
-
     const [existingUser] = await db.select().from(usersTable).where(eq(usersTable.email, email))
     if (existingUser) throw new Error("User Already Exists")
 

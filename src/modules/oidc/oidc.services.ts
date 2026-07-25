@@ -54,23 +54,7 @@ const jwks = async () => {
     }
 }
 
-const authorize = async ({ client_id, redirect_uri, response_type, scope, state, userId }: { client_id?: string; redirect_uri?: string; response_type?: string; scope?: string; state?: string; userId: string; }) => {
-    if (!client_id) {
-        throw new Error("client_id is required");
-    }
-
-    if (!redirect_uri) {
-        throw new Error("redirect_uri is required");
-    }
-
-    if (!response_type) {
-        throw new Error("response_type is required");
-    }
-
-    if (!scope) {
-        throw new Error("scope is required");
-    }
-
+const authorize = async ({ client_id, redirect_uri, response_type, scope, state, userId }: { client_id: string; redirect_uri: string; response_type: string; scope: string; state?: string; userId: string; }) => {
     const [client] = await db.select().from(clientsTable).where(eq(clientsTable.clientId, client_id))
 
     if (!client) throw new Error("Client Not Found")
@@ -101,22 +85,7 @@ const authorize = async ({ client_id, redirect_uri, response_type, scope, state,
     }
 }
 
-const token = async ({ client_id, client_secret, code, redirect_uri }: { client_id?: string, client_secret?: string, code?: string, redirect_uri?: string }) => {
-    if (!client_id) {
-        throw new Error("client_id is required");
-    }
-
-    if (!client_secret) {
-        throw new Error("client_secret is required");
-    }
-
-    if (!code) {
-        throw new Error("code is required");
-    }
-
-    if (!redirect_uri) {
-        throw new Error("redirect_uri is required");
-    }
+const token = async ({ client_id, client_secret, code, redirect_uri }: { client_id: string, client_secret: string, code: string, redirect_uri: string }) => {
 
     const [client] = await db.select().from(clientsTable).where(eq(clientsTable.clientId, client_id))
 

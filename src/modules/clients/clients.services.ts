@@ -4,30 +4,7 @@ import crypto, { UUID } from 'node:crypto'
 import { generateSecretToken } from "../../common/utils/jwt.utils.js"
 import { eq } from 'drizzle-orm'
 
-const createClient = async ({ name, redirectUri }: { name?: string; redirectUri?: string }) => {
-    if (!name?.trim()) {
-        throw new Error("Client name is required");
-    }
-
-    if (name.trim().length < 3) {
-        throw new Error("Client name must be at least 3 characters long");
-    }
-
-    // Validate redirect URI
-    if (!redirectUri?.trim()) {
-        throw new Error("Redirect URI is required");
-    }
-
-    try {
-        const url = new URL(redirectUri);
-
-        if (!["http:", "https:"].includes(url.protocol)) {
-            throw new Error();
-        }
-    } catch {
-        throw new Error("Invalid Redirect URI");
-    }
-
+const createClient = async ({ name, redirectUri }: { name: string; redirectUri: string }) => {
     // Generate credentials
     const clientId = crypto.randomUUID();
     const { rawToken, hashedToken } = generateSecretToken();
@@ -71,39 +48,8 @@ const updateClient = async (id: string, { name, redirectUri }: { name?: string; 
         redirectUri?: string;
     } = {};
 
-
-    if (name !== undefined) {
-        if (!name.trim()) {
-            throw new Error("Client name is required");
-        }
-
-        if (name.trim().length < 3) {
-            throw new Error(
-                "Client name must be at least 3 characters long"
-            );
-        }
-
-        updateData.name = name.trim();
-    }
-
-    // Validate redirect URI
-    if (redirectUri !== undefined) {
-        try {
-            const url = new URL(redirectUri);
-
-            if (!["http:", "https:"].includes(url.protocol)) {
-                throw new Error();
-            }
-
-            updateData.redirectUri = redirectUri.trim();
-        } catch {
-            throw new Error("Invalid Redirect URI");
-        }
-    }
-
-    if (Object.keys(updateData).length === 0) {
-        throw new Error("No fields provided for update");
-    }
+    if (name !== undefined) updateData.name = name.trim();
+    if (redirectUri !== undefined) updateData.redirectUri = redirectUri.trim();
 
     const updatedClient = await db.update(clientsTable).set(updateData).where(eq(clientsTable.id, id)).returning()
 

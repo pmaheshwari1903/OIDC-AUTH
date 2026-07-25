@@ -1,7 +1,7 @@
 import 'dotenv/config';
-import { db, clientsTable } from './src/common/db/index.js';
+import { db, clientsTable } from '../common/db/index.js';
 import crypto from 'node:crypto';
-import { generateSecretToken } from "./src/common/utils/jwt.utils.js";
+import { generateSecretToken } from "../common/utils/jwt.utils.js";
 
 async function main() {
     const name = "SRMPREPHUB";
