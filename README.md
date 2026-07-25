@@ -262,7 +262,7 @@ export async function GET(req: NextRequest) {
 const express = require("express");
 const app = express();
 
-const AUTH_SERVER = "https://oidc-auth-iota.vercel.app";
+const AUTH_SERVER = "https://oidcauth.vercel.app";
 
 // Redirect to Maheshwari Auth
 app.get("/login", (req, res) => {
