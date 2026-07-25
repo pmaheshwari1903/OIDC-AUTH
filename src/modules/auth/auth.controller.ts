@@ -73,12 +73,50 @@ const verifyEmail = async (req: Request, res: Response) => {
     }
 }
 
+const forgotPassword = async (req: Request, res: Response) => {
+    try {
+        const { email } = req.body;
+        await authServices.forgotPassword(email);
+
+        return res.status(200).json({
+            message: "If an account with that email exists, we have sent a password reset link."
+        });
+    } catch (error) {
+        return res.status(400).json({
+            message: error instanceof Error ? error.message : "Something went wrong"
+        });
+    }
+}
+
+const showResetPasswordPage = async (req: Request, res: Response) => {
+    // We don't render it here, the index.ts handles serving HTML pages, 
+    // but preserving the structure in case we need it here.
+}
+
+const resetPassword = async (req: Request, res: Response) => {
+    try {
+        const { token, newPassword } = req.body;
+        await authServices.resetPassword(token, newPassword);
+
+        return res.status(200).json({
+            message: "Password has been successfully reset. You can now log in."
+        });
+    } catch (error) {
+        return res.status(400).json({
+            message: error instanceof Error ? error.message : "Something went wrong"
+        });
+    }
+}
+
 export {
     showSignInPage,
     signIn,
     showSignUpPage,
     signUp,
     logout,
-    verifyEmail
+    verifyEmail,
+    forgotPassword,
+    showResetPasswordPage,
+    resetPassword
 }
 

@@ -35,6 +35,14 @@ app.get('/register', (req, res) => {
   res.sendFile(path.resolve('public/register.html'));
 });
 
+app.get('/forgot-password', (req, res) => {
+  res.sendFile(path.resolve('public/forgot-password.html'));
+});
+
+app.get('/api/auth/reset-password', (req, res) => {
+  res.sendFile(path.resolve('public/reset-password.html'));
+});
+
 app.use('/api/auth', authRoute)
 app.use('/api', clientRoute)
 app.use('/', oidcRoute)

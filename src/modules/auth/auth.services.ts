@@ -4,16 +4,13 @@ import { eq } from "drizzle-orm"
 import * as bcrypt from "bcrypt"
 import crypto from 'crypto'
 import { generateAccessToken, verifyAccessToken } from "../../common/utils/jwt.utils.js"
-import { sendVerificationEmail } from "../../common/utils/mailer.js"
+import { sendVerificationEmail, sendPasswordResetEmail } from "../../common/utils/mailer.js"
 
 
 const hashToken = (token: string) => {
     return crypto.createHash('sha256').update(token).digest('hex')
 }
 
-const showSignInPage = async () => {
-
-}
 
 const signIn = async ({ email, password }: { email: string; password: string }) => {
     const [user] = await db.select().from(usersTable).where(eq(usersTable.email, email))
@@ -44,9 +41,6 @@ const signIn = async ({ email, password }: { email: string; password: string }) 
 
 }
 
-const showSignUpPage = async () => {
-
-}
 
 const signUp = async ({ firstName, lastName, profileImageUrl, email, password }: { firstName: string; lastName: string; profileImageUrl?: string; email: string; password: string; }) => {
     const [existingUser] = await db.select().from(usersTable).where(eq(usersTable.email, email))
@@ -85,10 +79,40 @@ const verifyEmail = async (token: string) => {
     await db.update(usersTable).set({ emailVerified: true }).where(eq(usersTable.id, decoded.id));
 };
 
+const forgotPassword = async (email: string) => {
+    const [user] = await db.select().from(usersTable).where(eq(usersTable.email, email.trim()));
+    if (!user) {
+        // We don't throw an error to prevent email enumeration, just return silently
+        return;
+    }
+
+    const resetToken = generateAccessToken({ id: user.id, purpose: "reset_password" });
+    await sendPasswordResetEmail(user.email, resetToken);
+}
+
+const resetPassword = async (token: string, newPassword: string) => {
+    if (!token) throw new Error("No token provided");
+    if (!newPassword || newPassword.length < 6) throw new Error("Invalid password (minimum 6 characters)");
+
+    let decoded;
+    try {
+        decoded = verifyAccessToken(token) as { id: string, purpose?: string };
+    } catch (e) {
+        throw new Error("Invalid or expired token");
+    }
+
+    if (!decoded || !decoded.id || decoded.purpose !== "reset_password") {
+        throw new Error("Invalid or expired token for password reset");
+    }
+
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+    await db.update(usersTable).set({ password: hashedPassword }).where(eq(usersTable.id, decoded.id));
+}
+
 export {
-    showSignInPage,
     signIn,
-    showSignUpPage,
     signUp,
-    verifyEmail
+    verifyEmail,
+    forgotPassword,
+    resetPassword
 }

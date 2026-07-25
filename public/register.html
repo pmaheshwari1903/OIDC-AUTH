@@ -194,6 +194,33 @@
             margin-top: 1rem;
             text-align: center;
         }
+
+        .warning-banner {
+            margin-top: 1.25rem;
+            padding: 1rem 1.25rem;
+            background: rgba(251, 191, 36, 0.1);
+            border: 1px solid rgba(251, 191, 36, 0.35);
+            border-radius: 0.5rem;
+            display: flex;
+            align-items: flex-start;
+            gap: 0.625rem;
+        }
+
+        .warning-banner .warn-icon {
+            font-size: 1.25rem;
+            flex-shrink: 0;
+            line-height: 1.4;
+        }
+
+        .warning-banner .warn-text {
+            color: #fbbf24;
+            font-size: 0.85rem;
+            line-height: 1.5;
+        }
+
+        .warning-banner .warn-text strong {
+            color: #fde68a;
+        }
         
         .loading {
             opacity: 0.7;
@@ -276,7 +303,13 @@
                             <div class="credential-value">${data.client.clientSecret}</div>
                         </div>
                     </div>
-                    <p class="warning-text">⚠️ Please copy your Client Secret now. It will not be shown again.</p>
+                    <div class="warning-banner">
+                        <span class="warn-icon">⚠️</span>
+                        <div class="warn-text">
+                            <strong>Save your credentials now!</strong><br/>
+                            Your Client Secret is displayed <strong>only this one time</strong> and cannot be retrieved later. Copy and store it securely in your environment variables before closing this page.
+                        </div>
+                    </div>
                 `;
             } catch (err) {
                 resultBox.classList.add('error');

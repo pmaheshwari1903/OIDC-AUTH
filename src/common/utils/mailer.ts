@@ -43,3 +43,36 @@ export const sendVerificationEmail = async (to: string, token: string) => {
         // But in a strict system, you might want to throw an error.
     }
 };
+
+export const sendPasswordResetEmail = async (to: string, token: string) => {
+    // Determine the base URL 
+    const baseUrl = process.env.ISSUER || 'http://localhost:8000';
+    const resetLink = `${baseUrl}/api/auth/reset-password?token=${token}`;
+
+    const htmlContent = `
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #eaeaea; border-radius: 8px;">
+            <h2 style="color: #3b82f6; text-align: center;">Reset Your Password</h2>
+            <p style="color: #333; font-size: 16px;">Hello,</p>
+            <p style="color: #333; font-size: 16px;">We received a request to reset the password for your Maheshwari Auth account. Click the button below to choose a new password.</p>
+            <div style="text-align: center; margin: 30px 0;">
+                <a href="${resetLink}" style="background-color: #3b82f6; color: #ffffff; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: bold; font-size: 16px;">Reset Password</a>
+            </div>
+            <p style="color: #666; font-size: 14px; text-align: center;">This link will expire in 15 minutes. If you didn't request a password reset, you can safely ignore this email.</p>
+            <hr style="border: none; border-top: 1px solid #eaeaea; margin: 20px 0;" />
+            <p style="color: #999; font-size: 12px; text-align: center;">Or copy and paste this link into your browser:<br/><a href="${resetLink}" style="color: #3b82f6;">${resetLink}</a></p>
+        </div>
+    `;
+
+    try {
+        await transporter.sendMail({
+            from: `"Auth Service" <${process.env.SMTP_USER}>`,
+            to,
+            subject: 'Reset your Password - Auth Service',
+            html: htmlContent,
+        });
+        console.log(`Password reset email sent to ${to}`);
+    } catch (error) {
+        console.error(`Error sending password reset email to ${to}:`, error);
+        throw new Error("Failed to send password reset email");
+    }
+};
