@@ -10,7 +10,7 @@ const app = express()
 const PORT = process.env.PORT
 
 app.use(express.json());
-app.use(express.static("src/public"));
+app.use(express.static("public"));
 app.use(cookieParser());
 
 
@@ -28,11 +28,11 @@ app.get("/health", (req, res) => {
 })
 
 app.get('/home', (req, res) => {
-  res.sendFile(path.resolve('src/public/sign-in.html'));
+  res.sendFile(path.resolve('public/sign-in.html'));
 });
 
 app.get('/register', (req, res) => {
-  res.sendFile(path.resolve('src/public/register.html'));
+  res.sendFile(path.resolve('public/register.html'));
 });
 
 app.use('/api/auth', authRoute)
@@ -40,7 +40,7 @@ app.use('/api', clientRoute)
 app.use('/', oidcRoute)
 
 app.use((req, res) => {
-  res.status(404).sendFile(path.resolve('src/public/404.html'));
+  res.status(404).sendFile(path.resolve('public/404.html'));
 });
 
 if (process.env.NODE_ENV !== 'production') {
