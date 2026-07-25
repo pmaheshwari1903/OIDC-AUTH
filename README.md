@@ -7,9 +7,9 @@
 <h1 align="center">🔐 Maheshwari Auth</h1>
 
 <p align="center">
-  <b>Secure, standards-compliant authentication for your website.</b><br/>
-  Just like "Sign in with Google" — but powered by Maheshwari Auth.<br/>
-  Add a trusted sign-in experience to your app in minutes.
+  <b>An educational OAuth 2.0 and OIDC-inspired authentication provider.</b><br/>
+  Learn how Identity Providers work under the hood.<br/>
+  Add a basic sign-in experience to your hobby projects in minutes.
 </p>
 
 <p align="center">
@@ -36,7 +36,7 @@ Stop building authentication from scratch. Let Maheshwari Auth handle sign-in, s
 | **Email Verification Built-In** | Every user's email is verified — no spam accounts |
 | **Secure OAuth 2.0 Flow** | Industry-standard Authorization Code flow |
 | **User Profiles** | Get name, email, and profile picture out of the box |
-| **RS256 Token Signing** | Tokens signed with RSA keys — verify them with our public JWKS |
+| **Signed JWTs** | Tokens signed with HS256 — verify them server-side |
 | **Zero Cost** | Completely free to integrate into your website |
 
 ---
@@ -346,6 +346,41 @@ Choose which data your app can access:
 | `email` | `email`, `email_verified` | User's verified email address |
 
 **Example scope string:** `openid profile email`
+
+---
+
+## 🛡️ Security & Production Readiness (Disclaimer)
+
+Maheshwari Auth is designed as a **foundational, educational project** to help developers learn how Identity Providers work. 
+
+If you are evaluating this for production, please be aware of the following architectural and security limitations:
+
+### 1. OIDC Compliance Limitations
+This is an **"OAuth-inspired"** implementation. While it supports Discovery (`/.well-known/...`) and basic JWT tokens, it **does not** fully implement the OpenID Connect core specification.
+- **Missing Features:** No `nonce` validation, no PKCE (Proof Key for Code Exchange) support, and limited `aud` (audience) / `iss` (issuer) validation.
+- Token signatures currently use **HS256** (symmetric), not RS256 (asymmetric).
+
+### 2. Missing Core Security Mechanisms
+A production OIDC server requires mechanisms we haven't implemented yet:
+- No **refresh tokens** or token rotation.
+- No **token revocation** or active session management.
+- No **logout** endpoint (Session termination is strictly local).
+- No replay attack protection or strict CSRF checks.
+
+### 3. Abuse Prevention & Rate Limiting
+Authentication APIs are prime targets for attacks. We currently lack:
+- Login throttling / Brute-force protection
+- Captcha integration
+- Malicious bot prevention
+
+### 4. Enterprise Identity Features
+To compete with solutions like Google or Auth0, the following would need to be built:
+- **Account Recovery / 2FA (MFA)**
+- Social login federation (e.g., Sign in with Google)
+- Suspicious login detection and automatic account locking
+- Audit logs for security monitoring
+
+> **Takeaway:** This project serves as a fantastic learning tool to understand the mechanics of OAuth 2.0 flows, but should be used with caution (or heavily augmented) in a real-world enterprise environment.
 
 ---
 
