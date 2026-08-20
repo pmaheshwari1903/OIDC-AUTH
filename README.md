@@ -291,7 +291,7 @@ export async function GET(req: NextRequest) {
 
 ## 📖 API Reference
 
-> **Base URL:** `https://oidc-auth-iota.vercel.app`
+> **Base URL:** `https://oidcauth.vercel.app/register`
 
 ### Discovery
 
