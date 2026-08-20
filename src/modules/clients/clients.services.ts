@@ -38,6 +38,12 @@ const getClientById = async (id: string, body: any) => {
     return clients
 }
 
+const getPublicClientDetails = async (clientId: string) => {
+    const [client] = await db.select().from(clientsTable).where(eq(clientsTable.clientId, clientId))
+    if (!client) throw new Error("Client Not Found")
+    return { name: client.name }
+}
+
 const updateClient = async (id: string, { name, redirectUri }: { name?: string; redirectUri?: string }) => {
     const [existingClient] = await db.select().from(clientsTable).where(eq(clientsTable.id, id))
     if (!existingClient) throw new Error("Client not Found")
@@ -71,5 +77,6 @@ export {
     getClients,
     getClientById,
     updateClient,
-    deleteClient
+    deleteClient,
+    getPublicClientDetails
 }

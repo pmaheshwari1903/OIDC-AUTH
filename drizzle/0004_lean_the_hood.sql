@@ -1,0 +1,1 @@
+ALTER TABLE "authorization-codes" ADD COLUMN "purpose" varchar(255) DEFAULT 'authentication' NOT NULL;

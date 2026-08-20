@@ -42,6 +42,17 @@ const getClientById = async (req: Request, res: Response) => {
     }
 }
 
+const getPublicClientDetails = async (req: Request, res: Response) => {
+    try {
+        const clientId = req.params.clientId as string;
+        const client = await clientServices.getPublicClientDetails(clientId);
+        return res.status(200).json({ client });
+    } catch (error) {
+        console.error(error)
+        return res.status(404).json({ message: "Client Not Found" })
+    }
+}
+
 const updateClient = async (req: Request, res: Response) => {
     try {
         const id = req.params.id as string;
@@ -76,5 +87,6 @@ export {
     getClients,
     getClientById,
     updateClient,
-    deleteClient
+    deleteClient,
+    getPublicClientDetails
 }

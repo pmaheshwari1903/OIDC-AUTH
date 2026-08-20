@@ -3,7 +3,7 @@ import {db, authorizationCodesTable} from '../../common/db/index.js'
 import {addMinutes} from 'date-fns'
 import { eq } from 'drizzle-orm'
 
-const createAuthorizationCode = async ({clientId, userId, redirectUri, scope} : {clientId: string; userId: string; redirectUri: string; scope: string;}) => {
+const createAuthorizationCode = async ({clientId, userId, redirectUri, scope, purpose} : {clientId: string; userId: string; redirectUri: string; scope: string; purpose?: string;}) => {
     const code = crypto.randomBytes(16).toString('hex')
     const expiresAt = addMinutes(new Date(), 5)
     const [authorizationCode] = await db.insert(authorizationCodesTable).values({
@@ -12,6 +12,7 @@ const createAuthorizationCode = async ({clientId, userId, redirectUri, scope} : 
         userId,
         redirectUri,
         scope,
+        purpose: purpose || "authentication",
         expiresAt,
     }).returning()
     return authorizationCode.code

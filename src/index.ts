@@ -4,6 +4,9 @@ import path from "node:path"
 import authRoute from "./modules/auth/auth.routes.js"
 import clientRoute from "./modules/clients/clients.routes.js"
 import oidcRoute from "./modules/oidc/oidc.routes.js"
+import consentsRoute from "./modules/consents/consents.routes.js"
+import dataAccessRoute from "./modules/data-access/data-access.routes.js"
+import adminRoute from "./modules/admin/admin.routes.js"
 import cookieParser from "cookie-parser";
 
 const app = express()
@@ -43,8 +46,23 @@ app.get('/api/auth/reset-password', (req, res) => {
   res.sendFile(path.resolve('public/reset-password.html'));
 });
 
+app.get('/consent', (req, res) => {
+  res.sendFile(path.resolve('public/consent.html'));
+});
+
+app.get('/data-access', (req, res) => {
+  res.sendFile(path.resolve('public/data-access.html'));
+});
+
+app.get('/admin', (req, res) => {
+  res.sendFile(path.resolve('public/admin.html'));
+});
+
 app.use('/api/auth', authRoute)
 app.use('/api', clientRoute)
+app.use('/api', consentsRoute)
+app.use('/api', dataAccessRoute)
+app.use('/api', adminRoute)
 app.use('/', oidcRoute)
 
 app.use((req, res) => {

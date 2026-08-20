@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Data Access History - Maheswari Identity</title>
+    <link rel="stylesheet" href="./css/style.css">
+    <style>
+        .access-card { background: var(--bg-secondary); border: 1px solid var(--border-color); padding: 16px; border-radius: 8px; margin-bottom: 16px; }
+        .access-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+        .access-client { font-weight: 600; color: var(--text-primary); }
+        .access-time { font-size: 12px; color: var(--text-secondary); }
+        .access-details { font-size: 14px; color: var(--text-secondary); line-height: 1.6; }
+        .access-label { font-weight: 500; color: var(--text-primary); }
+        .status-badge { display: inline-block; padding: 2px 8px; border-radius: 12px; font-size: 12px; font-weight: 500; }
+        .status-success { background: #e6f4ea; color: #137333; }
+        .status-partial { background: #fef7e0; color: #b06000; }
+    </style>
+</head>
+<body>
+    <div class="auth-card" style="max-width: 600px; width: 90%;">
+        <div class="brand">
+            <img src="./assets/maheshwari-identity-logo.svg" alt="Logo" class="logo">
+            <h1>Data Access History</h1>
+        </div>
+        <div id="accessList">
+            <p style="color: var(--text-secondary); text-align: center;">Loading...</p>
+        </div>
+    </div>
+    <script src="./js/data-access.js"></script>
+</body>
+</html>

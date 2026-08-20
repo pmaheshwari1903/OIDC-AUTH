@@ -52,14 +52,22 @@ const authorize = async (req: Request, res: Response) => {
             return res.redirect(`/home?${queryString}`);
         }
 
-        const { shortCode, redirectUri: redirectUriFromService, state } = await oidcServices.authorize({
+        const authorizeResult = await oidcServices.authorize({
             client_id: req.query.client_id as string,
             redirect_uri: req.query.redirect_uri as string,
             response_type: req.query.response_type as string,
             scope: req.query.scope as string,
             state: req.query.state as string | undefined,
             userId: user.id,
+            purpose: req.query.purpose as string | undefined,
         });
+
+        if (authorizeResult.requiresConsent) {
+            const queryParams = new URLSearchParams(req.query as any).toString();
+            return res.redirect(`/consent?${queryParams}`);
+        }
+
+        const { shortCode, redirectUri: redirectUriFromService, state } = authorizeResult;
 
         const redirectUri = state
             ? `${redirectUriFromService}?code=${shortCode}&state=${state}`
@@ -116,10 +124,61 @@ const userInfo = async (req: Request, res: Response) => {
     }
 }
 
+const consent = async (req: Request, res: Response) => {
+    try {
+        const { client_id, redirect_uri, scope, state, decision, purpose } = req.body;
+        
+        if (decision === 'deny') {
+            const redirectUri = state
+                ? `${redirect_uri}?error=access_denied&state=${state}`
+                : `${redirect_uri}?error=access_denied`
+            return res.status(200).json({ redirectUri });
+        }
+
+        if (decision !== 'allow') {
+            return res.status(400).json({ message: "Invalid decision" });
+        }
+
+        const token = req.cookies.accessToken;
+        if (!token) {
+            return res.status(401).json({ message: "Unauthorized" });
+        }
+
+        const payload = verifyAccessToken(token) as JwtPayload;
+        const [user] = await db.select().from(usersTable).where(eq(usersTable.id, payload.id));
+        if (!user) {
+            return res.status(401).json({ message: "Unauthorized" });
+        }
+
+        const { shortCode, redirectUri: redirectUriFromService, state: returnState } = await oidcServices.saveConsent({
+            client_id,
+            redirect_uri,
+            scope,
+            state,
+            userId: user.id,
+            purpose
+        });
+
+        const redirectUri = returnState
+            ? `${redirectUriFromService}?code=${shortCode}&state=${returnState}`
+            : `${redirectUriFromService}?code=${shortCode}`
+
+        return res.status(200).json({ redirectUri });
+    } catch (error) {
+        return res.status(400).json({
+            message:
+                error instanceof Error
+                    ? error.message
+                    : "Something went wrong",
+        });
+    }
+}
+
 export {
     serviceDiscovery,
     jwks,
     authorize,
     token,
-    userInfo
+    userInfo,
+    consent
 }

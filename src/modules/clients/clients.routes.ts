@@ -6,6 +6,7 @@ const router = Router()
 
 router.post('/clients', validateCreateClientRequest, controller.createClient)
 router.get('/clients', controller.getClients)
+router.get('/clients/public/:clientId', controller.getPublicClientDetails)
 router.get('/clients/:id', controller.getClientById)
 router.patch('/clients/:id', validateUpdateClientRequest, controller.updateClient)
 router.delete('/clients/:id', controller.deleteClient)

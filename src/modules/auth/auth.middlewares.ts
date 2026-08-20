@@ -1,38 +1,39 @@
 import { Request, Response, NextFunction } from 'express';
+import { signInSchema, signUpSchema } from './auth.schemas.js';
 
-export const validateSignInRequest = (req: Request, res: Response, next: NextFunction): any => {
-    const { email, password } = req.body;
+export const validateSignInRequest = (
+    req: Request,
+    res: Response,
+    next: NextFunction
+) => {
+    const result = signInSchema.safeParse(req.body);
 
-    if (!email?.trim()) {
-        return res.status(400).json({ message: "Email is required" });
+    if (!result.success) {
+        return res.status(400).json({
+            message: "Validation failed",
+            errors: result.error.issues
+        });
     }
 
-    if (!password?.trim()) {
-        return res.status(400).json({ message: "Password is required" });
-    }
-
+    req.body = result.data;
     next();
 };
 
-export const validateSignUpRequest = (req: Request, res: Response, next: NextFunction): any => {
-    const { firstName, lastName, email, password } = req.body;
+export const validateSignUpRequest = (
+    req: Request,
+    res: Response,
+    next: NextFunction
+) => {
+    const result = signUpSchema.safeParse(req.body);
 
-    if (!firstName?.trim()) {
-        return res.status(400).json({ message: "First name is required" });
+    if (!result.success) {
+        return res.status(400).json({
+            message: "Validation failed",
+            errors: result.error.issues
+        });
     }
 
-    if (!lastName?.trim()) {
-        return res.status(400).json({ message: "Last name is required" });
-    }
-
-    if (!email?.trim()) {
-        return res.status(400).json({ message: "Email is required" });
-    }
-
-    if (!password?.trim()) {
-        return res.status(400).json({ message: "Password is required" });
-    }
-
+    req.body = result.data;
     next();
 };
 

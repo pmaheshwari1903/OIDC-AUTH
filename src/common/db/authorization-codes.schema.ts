@@ -1,4 +1,4 @@
-import { pgTable, uuid, text, boolean, timestamp } from "drizzle-orm/pg-core";
+import { pgTable, uuid, text, boolean, timestamp, varchar } from "drizzle-orm/pg-core";
 import {clientsTable} from "./clients.schema.js"
 import {usersTable} from "./user.schema.js"
 
@@ -14,6 +14,8 @@ export const authorizationCodesTable = pgTable("authorization-codes",{
     redirectUri: text("redirect_uri").notNull(),
 
     scope: text("scope").notNull(),
+
+    purpose: varchar("purpose", { length: 255 }).default("authentication").notNull(),
 
     expiresAt: timestamp("expires_at").notNull(),
 

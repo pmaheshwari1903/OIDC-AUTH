@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - Maheswari Identity</title>
+    <link rel="stylesheet" href="./css/style.css">
+    <style>
+        .dashboard-container { max-width: 1000px; margin: 0 auto; padding: 24px; width: 90%; }
+        .grid-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 24px; }
+        .card { background: var(--bg-secondary); border: 1px solid var(--border-color); padding: 16px; border-radius: 8px; }
+        .card h3 { font-size: 14px; color: var(--text-secondary); margin-bottom: 8px; }
+        .card .value { font-size: 28px; font-weight: 700; color: var(--text-primary); }
+        .grid-tables { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 16px; margin-bottom: 24px; }
+        table { width: 100%; border-collapse: collapse; text-align: left; }
+        th, td { padding: 10px; border-bottom: 1px solid var(--border-color); }
+        th { font-size: 14px; font-weight: 600; color: var(--text-secondary); }
+        td { font-size: 14px; color: var(--text-primary); }
+        .status-badge { display: inline-block; padding: 2px 8px; border-radius: 12px; font-size: 12px; font-weight: 500; }
+        .status-success { background: #e6f4ea; color: #137333; }
+        .status-denied { background: #fce8e6; color: #c5221f; }
+        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
+        .btn-outline { background: transparent; border: 1px solid var(--border-color); color: var(--text-primary); padding: 8px 16px; border-radius: 4px; cursor: pointer; }
+        .alert-card { background: var(--bg-secondary); border-left: 4px solid #c5221f; padding: 16px; border-radius: 4px; margin-bottom: 12px; }
+        .alert-card.severity-high { border-left-color: #c5221f; }
+        .alert-card.severity-medium { border-left-color: #e37400; }
+        .alert-card.severity-low { border-left-color: #1a73e8; }
+        .alert-type { font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px; }
+        .alert-desc { font-size: 14px; color: var(--text-secondary); margin-bottom: 4px; }
+        .alert-severity { font-size: 12px; font-weight: 500; text-transform: uppercase; }
+        .section-title { font-size: 16px; font-weight: 600; color: var(--text-primary); margin-bottom: 12px; }
+    </style>
+</head>
+<body>
+    <div class="dashboard-container">
+        <div class="header">
+            <div class="brand" style="margin: 0; text-align: left;">
+                <img src="./assets/maheshwari-identity-logo.svg" alt="Logo" class="logo" style="margin: 0 0 10px 0; width: 40px;">
+                <h1 style="margin: 0; font-size: 20px;">Admin Observability</h1>
+            </div>
+            <div><button class="btn-outline" id="logoutBtn">Logout</button></div>
+        </div>
+
+        <div id="loading" style="text-align: center; padding: 40px; color: var(--text-secondary);">Loading metrics...</div>
+
+        <div id="dashboard" style="display: none;">
+            <div class="grid-cards">
+                <div class="card"><h3>Total Accesses</h3><div class="value" id="valTotal">0</div></div>
+                <div class="card"><h3>Successful</h3><div class="value" id="valSuccess" style="color: #137333;">0</div></div>
+                <div class="card"><h3>Denied</h3><div class="value" id="valDenied" style="color: #c5221f;">0</div></div>
+                <div class="card"><h3>Active Clients</h3><div class="value" id="valClients">0</div></div>
+            </div>
+
+            <div class="grid-tables">
+                <div class="card">
+                    <h3>Top Clients</h3>
+                    <table>
+                        <thead><tr><th>Client</th><th>Accesses</th></tr></thead>
+                        <tbody id="topClientsTable"></tbody>
+                    </table>
+                </div>
+                <div class="card">
+                    <h3>Top Scopes</h3>
+                    <table>
+                        <thead><tr><th>Scope</th><th>Requests</th></tr></thead>
+                        <tbody id="topScopesTable"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3>Recent Data Access</h3>
+                <table>
+                    <thead><tr><th>Client</th><th>Scopes Accessed</th><th>Status</th><th>Time</th></tr></thead>
+                    <tbody id="recentAccessTable"></tbody>
+                </table>
+            </div>
+
+            <div style="margin-top: 24px;">
+                <h2 class="section-title">🔒 Security Alerts</h2>
+                <div id="anomalyList">
+                    <p style="color: var(--text-secondary);">Loading alerts...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="./js/admin.js"></script>
+</body>
+</html>

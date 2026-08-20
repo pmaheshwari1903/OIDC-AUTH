@@ -1,442 +1,363 @@
-<p align="center">
-  <img src="https://img.shields.io/badge/Maheshwari_Auth-Identity_Provider-blueviolet?style=for-the-badge&logo=openid&logoColor=white" alt="Maheshwari Auth"/>
-  <img src="https://img.shields.io/badge/OAuth_2.0-Secure-success?style=for-the-badge&logo=auth0&logoColor=white" alt="OAuth 2.0"/>
-  <img src="https://img.shields.io/badge/OpenID_Connect-Certified-blue?style=for-the-badge&logo=openid&logoColor=white" alt="OIDC"/>
-</p>
+# Maheshwari Auth
 
-<h1 align="center">🔐 Maheshwari Auth</h1>
-
-<p align="center">
-  <b>An educational OAuth 2.0 and OIDC-inspired authentication provider.</b><br/>
-  Learn how Identity Providers work under the hood.<br/>
-  Add a basic sign-in experience to your hobby projects in minutes.
-</p>
-
-<p align="center">
-  <a href="#-why-maheshwari-auth">Why Us</a> •
-  <a href="#-get-started-in-3-steps">Get Started</a> •
-  <a href="#-integration-guide">Integration Guide</a> •
-  <a href="#-code-examples">Code Examples</a> •
-  <a href="#-api-reference">API Reference</a> •
-  <a href="#-scopes--user-data">Scopes & Data</a> •
-  <a href="#-join-the-community">Community</a>
-</p>
-
-<br/>
+A generic, domain-agnostic OpenID Connect (OIDC) authentication and authorization platform built by **Maheshwari Auth**. Third-party applications (food delivery, fitness, e-commerce, OTT, education, travel, etc.) can use this service to authenticate users and request specific user information — with full user consent, purpose-based privacy controls, data minimization, access observability, and rule-based anomaly detection.
 
 ---
 
-## 🌟 Why Maheshwari Auth?
+## Architecture
 
-Stop building authentication from scratch. Let Maheshwari Auth handle sign-in, sign-up, email verification, and user management so you can **focus on your product**.
+```
+User (Browser)
+     │
+     ▼
+Maheshwari Auth Server (Express + PostgreSQL)
+     │
+     ▼
+Third-Party Client Application
+```
 
-| ✅ Feature | 💡 What You Get |
+**Data flow:**
+
+```
+Client requests scopes (e.g. profile, email, location)
+     ↓
+User authenticates (signup/login)
+     ↓
+User sees consent screen (scopes + purpose)
+     ↓
+User allows or denies
+     ↓
+Authorization code issued
+     ↓
+Client exchanges code for access token
+     ↓
+Client calls /userinfo with access token
+     ↓
+Server checks: scope + consent + purpose
+     ↓
+Only authorized claims returned (data minimization)
+     ↓
+Data access event recorded (observability)
+```
+
+---
+
+## Authentication Flow
+
+```
+1. Signup / Login
+        ↓
+2. GET /authorize?client_id=...&scope=...&purpose=...
+        ↓
+3. Consent Screen (Allow / Deny)
+        ↓
+4. Authorization Code → redirect to client
+        ↓
+5. POST /token (code + client_secret → access_token + id_token)
+        ↓
+6. GET /userinfo (Bearer access_token → user claims)
+```
+
+---
+
+## User Data Model
+
+| Table | Purpose |
 |---|---|
-| **"Sign in with Maheshwari Auth"** | A trusted, branded login experience for your users |
-| **Email Verification Built-In** | Every user's email is verified — no spam accounts |
-| **Secure OAuth 2.0 Flow** | Industry-standard Authorization Code flow |
-| **User Profiles** | Get name, email, and profile picture out of the box |
-| **Signed JWTs** | Tokens signed with HS256 — verify them server-side |
-| **Zero Cost** | Completely free to integrate into your website |
+| `users` | Core authentication record (email, password, name) |
+| `user_profiles` | Extended profile data (city, state, country, locale, location metadata) |
+| `user_interests` | User interests (e.g. fitness, technology, cooking) |
+
+Profile and interest data is stored separately from the authentication record because:
+- Not all applications need profile data — some only need authentication.
+- Keeping them separate supports data minimization: the server only queries profile/interest tables when those scopes are authorized.
 
 ---
 
-## ⚡ Get Started in 3 Steps
+## Scope + Claim Catalog
 
-```
-1️⃣  Register your app → get your Client ID & Secret
-2️⃣  Add a "Sign in with Maheshwari Auth" button to your site
-3️⃣  Handle the callback → receive user data
-```
+The server defines a central catalog of supported scopes and their mapped claims:
 
-That's it. Your users can now sign in securely through Maheshwari Auth. 🎉
+| Scope | Claims Returned |
+|---|---|
+| `openid` | `sub` (always included) |
+| `profile` | `given_name`, `family_name`, `picture` |
+| `email` | `email` |
+| `location` | `city`, `state`, `country`, `locale` |
+| `interests` | `interests` |
 
----
-
-## 🔄 How It Works
-
-Just like Google or GitHub OAuth — a simple redirect-based flow:
-
-```
-┌──────────────┐                              ┌──────────────────┐
-│              │  1. User clicks "Sign In"     │                  │
-│  Your App    │ ─────────────────────────────►│  Maheshwari Auth  │
-│              │                               │                  │
-│              │  2. User signs in/signs up     │  We handle:      │
-│              │     on our secure page         │  • Sign-in UI    │
-│              │                               │  • Sign-up UI    │
-│              │  3. Redirected back with code  │  • Email verify  │
-│              │◄─────────────────────────────  │  • Password hash │
-│              │                               │                  │
-│              │  4. Exchange code for tokens   │                  │
-│              │ ─────────────────────────────►│                  │
-│              │                               │                  │
-│              │  5. Get user profile           │                  │
-│              │◄─────────────────────────────  │                  │
-└──────────────┘                              └──────────────────┘
-```
-
-> 💡 **You never handle passwords.** All authentication happens on our secure servers.
+Defined in: `src/modules/oidc/oidc.scopes.ts`
 
 ---
 
-## 🚀 Integration Guide
+## Consent System
 
-### Step 1 — Register Your Application
+Consent is stored in the `consents` table with the following dimensions:
 
-Head over to the **Maheshwari Auth Registration Portal** and register your app:
-
-### 👉 [**Register Your App Here →**](https://oidcauth.vercel.app/register)
-
-Fill in your **App Name** and **Redirect URI** (the URL where users will be sent after signing in). Once submitted, you'll receive:
-
-```json
-{
-  "clientId": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
-  "clientSecret": "your-secret-token-save-it-now"
-}
+```
+User + Client + Scope + Purpose = Consent Record
 ```
 
-> ⚠️ **The `clientSecret` is shown only once.** Copy it immediately and store it securely in your environment variables.
+Each consent is:
+- **User-specific** — User A's consent is independent of User B's
+- **Client-specific** — consent for FitZone is independent of consent for FoodApp
+- **Scope-specific** — consent for `location` is independent of consent for `email`
+- **Purpose-specific** — consent for `personalization` does NOT automatically grant `advertising`
+- **Revocable** — users can revoke consent at any time
+- **Optionally time-limited** — consent can have an expiration date
+
+### Supported Purposes
+`authentication`, `personalization`, `recommendations`, `analytics`, `marketing`, `advertising`
 
 ---
 
-### Step 2 — Add a "Sign In" Button
+## Consent Screen
 
-When a user wants to sign in, redirect them to Maheshwari Auth:
+When a third-party client requests user data, the user sees a consent screen showing:
+- The client application name
+- The scopes being requested (e.g. "Basic profile information", "Email address", "Approximate location")
+- The purpose (e.g. "Personalization")
+- Allow / Deny buttons
+
+The user must explicitly allow access before any data is shared.
+
+---
+
+## UserInfo Authorization
+
+The `/userinfo` endpoint enforces a strict authorization check:
 
 ```
-https://oidcauth.vercel.app/authorize
-    ?client_id=YOUR_CLIENT_ID
-    &redirect_uri=https://myapp.com/auth/callback
-    &response_type=code
-    &scope=openid profile email
-    &state=random_csrf_token
+For each requested scope:
+  1. Is the scope in the access token?
+  2. Does an active consent exist for this user + client + scope + purpose?
+  3. Is the consent status = "granted"?
+  4. Is it not revoked (revoked_at IS NULL)?
+  5. Is it not expired (expires_at IS NULL or expires_at > now)?
+     ↓
+  If ALL checks pass → include claims for this scope
+  If ANY check fails  → silently omit claims (no error thrown)
 ```
 
-| Parameter | Required | Description |
+**Formula:** `ALLOWED_CLAIMS = REQUESTED_SCOPES ∩ ACTIVE_CONSENT ∩ MATCHING_PURPOSE`
+
+---
+
+## Data Minimization
+
+The server returns **only** the minimum claims required by authorized scopes:
+
+- If only `location` is requested and authorized → only `city`, `state`, `country`, `locale` are returned
+- `email`, `given_name`, `family_name`, `interests` are **not** returned
+- Internal fields like `location_source`, `location_precision`, database IDs, timestamps, passwords are **never** exposed
+
+---
+
+## User Consent Management
+
+Authenticated users can manage their consents via REST APIs:
+
+| Endpoint | Purpose |
+|---|---|
+| `GET /api/consents` | View all granted consents |
+| `GET /api/consents/:id` | View a single consent |
+| `DELETE /api/consents/:id` | Revoke a consent (soft delete: sets `status = revoked`, `revoked_at = now`) |
+
+Users can only access their own consents. Cross-user access returns a 404.
+
+---
+
+## Data Access Observability
+
+Every `/userinfo` request creates a record in the `data_access_logs` table:
+
+| Field | Description |
+|---|---|
+| `user_id` | Whose data was accessed |
+| `client_id` | Which client accessed it |
+| `endpoint` | The endpoint called (e.g. `/userinfo`) |
+| `requested_scopes` | Scopes the client requested |
+| `granted_scopes` | Scopes that passed consent checks |
+| `purpose` | The purpose from the consent |
+| `success` | Whether all requested scopes were granted |
+| `denial_reason` | Why any scopes were denied (nullable) |
+| `created_at` | When the access occurred |
+
+**No credentials are ever stored** in the logs (no tokens, passwords, secrets, or authorization codes).
+
+---
+
+## User Access History
+
+Users can view their own data access history:
+
+| Endpoint | Purpose |
+|---|---|
+| `GET /api/data-access` | View which apps accessed your data, when, and what was shared |
+
+A simple frontend page at `/data-access` displays this information.
+
+---
+
+## Admin Observability Dashboard
+
+An admin-only dashboard at `/admin` shows:
+
+- **Total data-access requests**
+- **Successful vs denied accesses**
+- **Active clients count**
+- **Top 5 clients** (by access count)
+- **Top 5 scopes** (most requested)
+- **Recent 10 data-access events**
+- **Security alerts** (anomaly detection)
+
+Protected by `requireAuth` + `requireAdmin` middleware. Normal users receive a `403 Forbidden`.
+
+| Endpoint | Purpose |
+|---|---|
+| `GET /api/admin/observability` | Aggregated metrics from `data_access_logs` |
+| `GET /api/admin/anomalies` | Current anomaly alerts |
+
+---
+
+## Anomaly Detection
+
+Simple rule-based anomaly detection using the existing `data_access_logs` table. **No machine learning or AI is used.**
+
+### Rules
+
+| Rule | Description | Severity |
 |---|---|---|
-| `client_id` | ✅ | Your Client ID from Step 1 |
-| `redirect_uri` | ✅ | Must **exactly** match what you registered |
-| `response_type` | ✅ | Always `code` |
-| `scope` | ✅ | Must include `openid`. Add `profile` and/or `email` for more data |
-| `state` | Recommended | A random string for CSRF protection |
+| `HIGH_ACCESS_FREQUENCY` | Client makes > 100 requests in 5 minutes | High |
+| `HIGH_DENIAL_RATE` | ≥ 70% of a client's recent requests are denied | Medium/High |
+| `SCOPE_SPIKE` | Client suddenly requests 2x more distinct scopes than historical average | Medium |
 
-The user will see our sign-in page. After authenticating, we redirect them back to your `redirect_uri`:
+Thresholds are configured in `src/modules/admin/anomaly.config.ts`.
+
+**Interview explanation:** "The system analyzes existing data-access logs and applies predefined rules to identify unusual client behavior, such as excessive request rates, high denial rates, or sudden scope escalation."
+
+---
+
+## Security Controls
+
+| Control | Implementation |
+|---|---|
+| Redirect URI validation | Checked against registered client redirect URI |
+| Scope validation | Only scopes from the central catalog are accepted |
+| Authentication | JWT-based session via HttpOnly cookies |
+| Consent validation | Every scope checked against active consent records |
+| Purpose validation | Consent must match the specific purpose in the access token |
+| User/client isolation | Users can only access their own data; clients only get their authorized data |
+| Admin authorization | Admin endpoints protected by `requireAuth` + `requireAdmin` |
+| Data minimization | Only authorized scope claims are returned; internal fields never exposed |
+| No credential logging | Access tokens, passwords, secrets, and authorization codes are never stored in logs |
+
+---
+
+## Technology Stack
+
+| Technology | Usage |
+|---|---|
+| **TypeScript** | Server-side language |
+| **Express 5** | HTTP framework |
+| **PostgreSQL** | Database |
+| **Drizzle ORM** | Database queries and schema management |
+| **JSON Web Tokens (jsonwebtoken)** | Access tokens, ID tokens |
+| **node-jose** | JWKS endpoint |
+| **bcrypt** | Password hashing |
+| **Zod** | Request validation |
+| **nodemailer** | Password reset emails |
+| **cookie-parser** | Session cookie management |
+| **date-fns** | Date utilities |
+| **dotenv** | Environment variables |
+| **drizzle-kit** | Database migrations |
+| **tsc-watch** | Development hot reload |
+
+---
+
+## Project Structure
 
 ```
-https://myapp.com/auth/callback?code=AUTH_CODE&state=random_csrf_token
+src/
+├── common/
+│   ├── db/                          # Database schemas and connection
+│   │   ├── user.schema.ts
+│   │   ├── clients.schema.ts
+│   │   ├── authorization-codes.schema.ts
+│   │   ├── user-profiles.schema.ts
+│   │   ├── user-interests.schema.ts
+│   │   ├── consents.schema.ts
+│   │   ├── data-access-logs.schema.ts
+│   │   └── index.ts
+│   ├── middleware/
+│   │   ├── requireAuth.ts           # JWT authentication middleware
+│   │   └── requireAdmin.ts          # Admin authorization middleware
+│   └── utils/
+│       ├── jwt.utils.ts             # Token generation/verification
+│       └── cert.ts                  # JWKS key management
+├── modules/
+│   ├── auth/                        # Signup, login, password reset
+│   ├── clients/                     # Client registration
+│   ├── oidc/                        # Core OIDC endpoints
+│   │   ├── oidc.services.ts         # authorize, token, userinfo, saveConsent
+│   │   ├── oidc.controller.ts
+│   │   ├── oidc.routes.ts
+│   │   └── oidc.scopes.ts           # Central scope + claim + purpose catalog
+│   ├── authorization-codes/         # Auth code creation/lookup
+│   ├── consents/                    # User consent management APIs
+│   ├── data-access/                 # User data-access history API
+│   └── admin/                       # Admin observability + anomaly detection
+│       ├── admin.services.ts
+│       ├── admin.controller.ts
+│       ├── admin.routes.ts
+│       ├── anomaly.services.ts
+│       └── anomaly.config.ts
+├── index.ts                         # Express app setup and route mounting
+public/
+├── consent.html                     # Consent screen
+├── data-access.html                 # User data-access history page
+├── admin.html                       # Admin dashboard
+├── js/
+│   ├── consent.js
+│   ├── data-access.js
+│   └── admin.js
 ```
 
 ---
 
-### Step 3 — Exchange the Code for Tokens
+## Interview Explanation
 
-On your **server-side**, exchange the authorization code:
+> "I built Maheshwari Auth — a generic OIDC authentication and authorization server that allows third-party applications to authenticate users and request specific user data. The system uses a central scope-and-claim catalog to define what data each scope represents. Users explicitly provide consent for specific scopes and purposes through a consent screen, and the server enforces data minimization by returning only the claims that are both requested and consented. I implemented user consent management APIs so users can view and revoke permissions, a data-access observability layer that logs every access event, a user-facing access history page, an admin observability dashboard with aggregated metrics, and simple rule-based anomaly detection to flag suspicious client behavior like excessive request rates or high denial rates. The entire system is built with TypeScript, Express, PostgreSQL, and Drizzle ORM, and is designed to be domain-agnostic so any type of application can use it."
+
+---
+
+## Running the Project
 
 ```bash
-curl -X POST https://oidcauth.vercel.app/token \
-  -H "Content-Type: application/json" \
-  -d '{
-    "client_id": "YOUR_CLIENT_ID",
-    "client_secret": "YOUR_CLIENT_SECRET",
-    "code": "AUTH_CODE_FROM_CALLBACK",
-    "redirect_uri": "https://myapp.com/auth/callback"
-  }'
+# Install dependencies
+npm install
+
+# Generate database migrations
+npm run db:generate
+
+# Apply migrations
+npm run db:migrate
+
+# Start development server
+npm run dev
+
+# Build for production
+npm run build
 ```
 
-**Response:**
+### Environment Variables
 
-```json
-{
-  "access_token": "eyJhbGciOiJIUzI1NiIs...",
-  "id_token": "eyJhbGciOiJIUzI1NiIs...",
-  "token_type": "Bearer",
-  "expires_in": 900
-}
+Create a `.env` file with:
+
 ```
-
-> 🔒 **Never expose your `client_secret` on the frontend.** This call must be made from your backend server.
-
----
-
-### Step 4 — Get the User's Profile
-
-Use the `access_token` to fetch user info:
-
-```bash
-curl https://oidcauth.vercel.app/userinfo \
-  -H "Authorization: Bearer ACCESS_TOKEN"
+PORT=3000
+DATABASE_URL=postgresql://...
+JWT_ACCESS_SECRET=your-access-secret
+JWT_REFRESH_SECRET=your-refresh-secret
+ISSUER=http://localhost:3000
 ```
-
-**Response:**
-
-```json
-{
-  "sub": "unique-user-id",
-  "email": "user@example.com",
-  "given_name": "John",
-  "family_name": "Doe",
-  "picture": "https://example.com/avatar.jpg"
-}
-```
-
-Now create a session for the user in your app — you're done! 🎉
-
----
-
-## 💻 Code Examples
-
-### Next.js / React
-
-**Sign-in Button (Frontend):**
-
-```tsx
-const MAHESHWARI_AUTH = "https://oidcauth.vercel.app";
-
-function SignInButton() {
-  const handleSignIn = () => {
-    const params = new URLSearchParams({
-      client_id: process.env.NEXT_PUBLIC_CLIENT_ID!,
-      redirect_uri: `${window.location.origin}/api/auth/callback`,
-      response_type: "code",
-      scope: "openid profile email",
-      state: crypto.randomUUID(),
-    });
-
-    window.location.href = `${MAHESHWARI_AUTH}/authorize?${params}`;
-  };
-
-  return (
-    <button onClick={handleSignIn}>
-      🔐 Sign in with Maheshwari Auth
-    </button>
-  );
-}
-```
-
-**Callback Handler (Backend API Route):**
-
-```typescript
-// app/api/auth/callback/route.ts
-import { NextRequest, NextResponse } from "next/server";
-
-const AUTH_SERVER = "https://oidcauth.vercel.app";
-
-export async function GET(req: NextRequest) {
-  const code = req.nextUrl.searchParams.get("code");
-
-  // Exchange code for tokens
-  const tokenRes = await fetch(`${AUTH_SERVER}/token`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      client_id: process.env.OIDC_CLIENT_ID,
-      client_secret: process.env.OIDC_CLIENT_SECRET,
-      code,
-      redirect_uri: `${process.env.NEXT_PUBLIC_APP_URL}/api/auth/callback`,
-    }),
-  });
-  const tokens = await tokenRes.json();
-
-  // Get user profile
-  const userRes = await fetch(`${AUTH_SERVER}/userinfo`, {
-    headers: { Authorization: `Bearer ${tokens.access_token}` },
-  });
-  const user = await userRes.json();
-
-  // Create your session, set cookies, etc.
-  // user.sub → unique user ID
-  // user.email → verified email
-  // user.given_name, user.family_name → display name
-
-  return NextResponse.redirect(new URL("/dashboard", req.url));
-}
-```
-
----
-
-### Express.js
-
-```javascript
-const express = require("express");
-const app = express();
-
-const AUTH_SERVER = "https://oidcauth.vercel.app";
-
-// Redirect to Maheshwari Auth
-app.get("/login", (req, res) => {
-  const params = new URLSearchParams({
-    client_id: process.env.CLIENT_ID,
-    redirect_uri: "http://localhost:3000/auth/callback",
-    response_type: "code",
-    scope: "openid profile email",
-    state: Math.random().toString(36).substring(7),
-  });
-
-  res.redirect(`${AUTH_SERVER}/authorize?${params}`);
-});
-
-// Handle callback
-app.get("/auth/callback", async (req, res) => {
-  const { code } = req.query;
-
-  // Exchange code for tokens
-  const tokenRes = await fetch(`${AUTH_SERVER}/token`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      client_id: process.env.CLIENT_ID,
-      client_secret: process.env.CLIENT_SECRET,
-      code,
-      redirect_uri: "http://localhost:3000/auth/callback",
-    }),
-  });
-  const tokens = await tokenRes.json();
-
-  // Get user info
-  const userRes = await fetch(`${AUTH_SERVER}/userinfo`, {
-    headers: { Authorization: `Bearer ${tokens.access_token}` },
-  });
-  const user = await userRes.json();
-
-  // Create session and redirect
-  req.session.user = user;
-  res.redirect("/dashboard");
-});
-```
-
----
-
-## 📖 API Reference
-
-> **Base URL:** `https://oidcauth.vercel.app`
-
-### Discovery
-
-| Method | Endpoint | Description |
-|---|---|---|
-| `GET` | `/.well-known/openid-configuration` | OIDC discovery — lists all endpoints & capabilities |
-| `GET` | `/.well-known/jwks.json` | Public keys to verify token signatures |
-
-### OAuth / OIDC Flow
-
-| Method | Endpoint | Description |
-|---|---|---|
-| `GET` | `/authorize` | Start the sign-in flow — redirect users here |
-| `POST` | `/token` | Exchange authorization code for `access_token` + `id_token` |
-| `GET` | `/userinfo` | Get the signed-in user's profile (requires Bearer token) |
-
-### Client Registration
-
-| Action | Link | Description |
-|---|---|---|
-| 🔗 **Register** | [**oidcauth.vercel.app/register**](https://oidcauth.vercel.app/register) | Register your app to get `clientId` and `clientSecret` |
-
----
-
-## 🔐 Scopes & User Data
-
-Choose which data your app can access:
-
-| Scope | Claims Returned | Description |
-|---|---|---|
-| `openid` | `sub` | **Required.** Returns the unique user identifier |
-| `profile` | `given_name`, `family_name`, `picture` | User's name and profile picture |
-| `email` | `email`, `email_verified` | User's verified email address |
-
-**Example scope string:** `openid profile email`
-
----
-
-## 🛡️ Security & Production Readiness (Disclaimer)
-
-Maheshwari Auth is designed as a **foundational, educational project** to help developers learn how Identity Providers work. 
-
-If you are evaluating this for production, please be aware of the following architectural and security limitations:
-
-### 1. OIDC Compliance Limitations
-This is an **"OAuth-inspired"** implementation. While it supports Discovery (`/.well-known/...`) and basic JWT tokens, it **does not** fully implement the OpenID Connect core specification.
-- **Missing Features:** No `nonce` validation, no PKCE (Proof Key for Code Exchange) support, and limited `aud` (audience) / `iss` (issuer) validation.
-- Token signatures currently use **HS256** (symmetric), not RS256 (asymmetric).
-
-### 2. Missing Core Security Mechanisms
-A production OIDC server requires mechanisms we haven't implemented yet:
-- No **refresh tokens** or token rotation.
-- No **token revocation** or active session management.
-- No **logout** endpoint (Session termination is strictly local).
-- No replay attack protection or strict CSRF checks.
-
-### 3. Abuse Prevention & Rate Limiting
-Authentication APIs are prime targets for attacks. We currently lack:
-- Login throttling / Brute-force protection
-- Captcha integration
-- Malicious bot prevention
-
-### 4. Enterprise Identity Features
-To compete with solutions like Google or Auth0, the following would need to be built:
-- **Account Recovery / 2FA (MFA)**
-- Social login federation (e.g., Sign in with Google)
-- Suspicious login detection and automatic account locking
-- Audit logs for security monitoring
-
-> **Takeaway:** This project serves as a fantastic learning tool to understand the mechanics of OAuth 2.0 flows, but should be used with caution (or heavily augmented) in a real-world enterprise environment.
-
----
-
-## ❓ FAQ
-
-<details>
-<summary><b>Is Maheshwari Auth free to use?</b></summary>
-<br/>
-Yes! It's completely free for any website or application.
-</details>
-
-<details>
-<summary><b>Do I need to handle password storage?</b></summary>
-<br/>
-No. All passwords are securely hashed and stored on our servers. You never see or touch user passwords.
-</details>
-
-<details>
-<summary><b>How is this different from Firebase Auth or Auth0?</b></summary>
-<br/>
-Maheshwari Auth is a lightweight, open-standard OIDC provider. No vendor lock-in, no complex SDKs. Just standard HTTP requests that work with any language or framework.
-</details>
-
-<details>
-<summary><b>Can I use this with any framework?</b></summary>
-<br/>
-Yes! If your framework supports OAuth 2.0 / OpenID Connect (virtually all do), it works. We've shown examples with Next.js and Express, but it works with Django, Flask, Spring Boot, Laravel, Rails — anything.
-</details>
-
-<details>
-<summary><b>What happens if a user forgets their password?</b></summary>
-<br/>
-Password recovery is handled on the Maheshwari Auth side — your app doesn't need to worry about it.
-</details>
-
-<details>
-<summary><b>Are emails verified?</b></summary>
-<br/>
-Yes! Every user must verify their email before they can sign in. The <code>email_verified</code> claim in the user profile will always be <code>true</code>.
-</details>
-
----
-
-## 🤝 Join the Community
-
-Become part of the **Maheshwari Auth ecosystem** and let your users sign in with a trusted identity:
-
-- 🌐 **Integrate** — Add "Sign in with Maheshwari Auth" to your website
-- 💬 **Connect** — Share your integration and get featured
-- ⭐ **Support** — Star the repo on [GitHub](https://github.com/pmaheshwari1903/OIDC-AUTH) if Maheshwari Auth helped you!
-- 🐛 **Report Issues** — Found a bug? [Open an issue](https://github.com/pmaheshwari1903/OIDC-AUTH/issues)
-
----
-
-<p align="center">
-  <b>Built with ❤️ by <a href="https://github.com/pmaheshwari1903">Parth Maheshwari</a></b>
-  <br/><br/>
-  <i>Empowering developers with simple, secure authentication.</i>
-</p>

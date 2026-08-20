@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Consent Request - Maheswari Identity</title>
+    <link rel="stylesheet" href="./css/style.css">
+</head>
+<body>
+    <div class="auth-card">
+        <div class="brand">
+            <img src="./assets/maheshwari-identity-logo.svg" alt="Logo" class="logo">
+            <h1>Authorization Request</h1>
+        </div>
+        
+        <p class="subtitle" style="margin-bottom: 24px; color: var(--text-secondary); line-height: 1.5;">
+            An application <strong id="clientNameDisplay" style="color: var(--text-primary);">...</strong> is requesting access to your account.
+        </p>
+        
+        <div class="scopes-container" style="background: var(--bg-secondary); border-radius: 8px; padding: 16px; margin-bottom: 24px; border: 1px solid var(--border-color);">
+            <h3 style="font-size: 14px; font-weight: 500; margin-bottom: 12px; color: var(--text-primary);">It would like to access:</h3>
+            <ul id="scopesList" style="list-style-type: none; padding: 0; margin: 0;">
+                <!-- Scopes will be injected here -->
+            </ul>
+        </div>
+        
+        <div class="purpose-container" style="background: var(--bg-secondary); border-radius: 8px; padding: 16px; margin-bottom: 24px; border: 1px solid var(--border-color);">
+            <h3 style="font-size: 14px; font-weight: 500; margin-bottom: 8px; color: var(--text-primary);">Purpose:</h3>
+            <p id="purposeDisplay" style="font-size: 14px; color: var(--text-secondary); margin: 0; text-transform: capitalize;">Authentication</p>
+        </div>
+        
+        <div id="errorMessage" class="error-message" style="display: none; margin-bottom: 16px;"></div>
+
+        <form id="consentForm">
+            <div style="display: flex; gap: 12px;">
+                <button type="button" id="denyBtn" class="primary-btn" style="flex: 1; background: var(--bg-secondary); color: var(--text-primary); border: 1px solid var(--border-color);">Deny</button>
+                <button type="submit" id="allowBtn" class="primary-btn" style="flex: 1;">Allow Access</button>
+            </div>
+        </form>
+    </div>
+    
+    <script src="./js/consent.js"></script>
+</body>
+</html>
