@@ -1,363 +1,150 @@
-# Maheshwari Auth
+<div align="center">
+  <h1>🛡️ Maheshwari Auth</h1>
+  <p><strong>The Next-Generation, Domain-Agnostic OIDC Identity Platform</strong></p>
+  
+  <p>
+    <img src="https://img.shields.io/badge/TypeScript-007ACC?style=for-the-badge&logo=typescript&logoColor=white" alt="TypeScript" />
+    <img src="https://img.shields.io/badge/Express.js-404D59?style=for-the-badge&logo=express&logoColor=white" alt="Express.js" />
+    <img src="https://img.shields.io/badge/PostgreSQL-316192?style=for-the-badge&logo=postgresql&logoColor=white" alt="PostgreSQL" />
+    <img src="https://img.shields.io/badge/Drizzle-C5F74F?style=for-the-badge&logo=drizzle&logoColor=black" alt="Drizzle ORM" />
+  </p>
 
-A generic, domain-agnostic OpenID Connect (OIDC) authentication and authorization platform built by **Maheshwari Auth**. Third-party applications (food delivery, fitness, e-commerce, OTT, education, travel, etc.) can use this service to authenticate users and request specific user information — with full user consent, purpose-based privacy controls, data minimization, access observability, and rule-based anomaly detection.
-
----
-
-## Architecture
-
-```
-User (Browser)
-     │
-     ▼
-Maheshwari Auth Server (Express + PostgreSQL)
-     │
-     ▼
-Third-Party Client Application
-```
-
-**Data flow:**
-
-```
-Client requests scopes (e.g. profile, email, location)
-     ↓
-User authenticates (signup/login)
-     ↓
-User sees consent screen (scopes + purpose)
-     ↓
-User allows or denies
-     ↓
-Authorization code issued
-     ↓
-Client exchanges code for access token
-     ↓
-Client calls /userinfo with access token
-     ↓
-Server checks: scope + consent + purpose
-     ↓
-Only authorized claims returned (data minimization)
-     ↓
-Data access event recorded (observability)
-```
+  <p>
+    <em>Secure, transparent, and built for privacy. Give your users the confidence to share data with third-party applications while keeping full control.</em>
+  </p>
+</div>
 
 ---
 
-## Authentication Flow
+## 🚀 Why Maheshwari Auth?
 
-```
-1. Signup / Login
-        ↓
-2. GET /authorize?client_id=...&scope=...&purpose=...
-        ↓
-3. Consent Screen (Allow / Deny)
-        ↓
-4. Authorization Code → redirect to client
-        ↓
-5. POST /token (code + client_secret → access_token + id_token)
-        ↓
-6. GET /userinfo (Bearer access_token → user claims)
-```
+In today's digital ecosystem, users demand privacy and transparency. Maheshwari Auth isn't just an authentication server; it's a **trust engine** for your platform.
+
+Whether you're building an ecosystem for food delivery, fitness apps, e-commerce, OTT platforms, or education tools, Maheshwari Auth empowers third-party applications to authenticate users and request specific data—with uncompromising security and privacy.
+
+### ✨ The Maheshwari Advantage:
+- 🔐 **Explicit User Consent:** Users always know exactly what data they're sharing, to whom, and why.
+- 🎯 **Purpose-Based Privacy:** Granular permissions tied to specific use cases (e.g., personalization vs. marketing).
+- 📉 **Data Minimization by Default:** We return only the absolute minimum claims authorized. Nothing more, ever.
+- 👁️ **Total Observability:** Complete transparency into data-access logs for both end-users and administrators.
+- 🛡️ **Built-in Anomaly Detection:** Real-time, rule-based security monitoring to guard against malicious client behavior.
 
 ---
 
-## User Data Model
+## 🏗️ Architecture at a Glance
 
-| Table | Purpose |
-|---|---|
-| `users` | Core authentication record (email, password, name) |
-| `user_profiles` | Extended profile data (city, state, country, locale, location metadata) |
-| `user_interests` | User interests (e.g. fitness, technology, cooking) |
+Maheshwari Auth sits securely between your users and third-party applications, ensuring that every data exchange is verified, authorized, and logged.
 
-Profile and interest data is stored separately from the authentication record because:
-- Not all applications need profile data — some only need authentication.
-- Keeping them separate supports data minimization: the server only queries profile/interest tables when those scopes are authorized.
+```mermaid
+graph TD
+    A[User Browser] -->|Authenticates & Consents| B(Maheshwari Auth Server)
+    B -->|Issues Tokens| C[Third-Party Application]
+    C -->|Requests /userinfo with Token| B
+    B -->|Returns Minimized Data| C
+```
+
+### 🔄 The Seamless Authentication Flow
+1. **Signup / Login**: The user establishes their core identity.
+2. **Authorize**: Client requests specific scopes (e.g., `profile`, `location`) and a purpose.
+3. **Consent Screen**: User reviews the request and clicks Allow/Deny.
+4. **Code Exchange**: Secure authorization code is exchanged for an Access Token.
+5. **Data Access**: Client calls `/userinfo`, and the server enforces strict data minimization before returning data.
 
 ---
 
-## Scope + Claim Catalog
+## 💎 Features Built for Enterprise Trust
 
-The server defines a central catalog of supported scopes and their mapped claims:
+### 1. Granular Scope & Claim Catalog
+Our centralized catalog maps scopes perfectly to actionable claims, ensuring clients get exactly what they need without over-fetching.
 
 | Scope | Claims Returned |
-|---|---|
-| `openid` | `sub` (always included) |
+|:---|:---|
+| `openid` | `sub` (Always included) |
 | `profile` | `given_name`, `family_name`, `picture` |
 | `email` | `email` |
 | `location` | `city`, `state`, `country`, `locale` |
 | `interests` | `interests` |
 
-Defined in: `src/modules/oidc/oidc.scopes.ts`
+### 2. Multi-Dimensional Consent System
+Consent isn't just a simple toggle. It's a precise contract:
+`User` + `Client` + `Scope` + `Purpose` = **Consent Record**
+
+- **Client-specific:** Permissions for App A don't apply to App B.
+- **Purpose-specific:** Granting access for `personalization` doesn't grant access for `advertising`.
+- **Revocable & Expirable:** Users maintain lifetime control over their data.
+
+### 3. Absolute Data Minimization
+If a client requests `location`, they get `location`—and absolutely nothing else. Internal database IDs, timestamps, and credential hashes are **never** exposed.
+
+### 4. Panoptic Observability & Anomaly Detection
+Every single `/userinfo` request is logged (without ever storing credentials). 
+- **Users** get a beautiful dashboard to see exactly who accessed their data and when.
+- **Admins** get a powerful observability suite featuring rule-based anomaly detection to automatically flag:
+  - 🚨 **High Access Frequency** (>100 requests / 5 mins)
+  - 🚨 **High Denial Rates** (Suspicious probing)
+  - 🚨 **Scope Spikes** (Sudden aggressive data requests)
 
 ---
 
-## Consent System
+## 🛠️ Uncompromising Security Controls
 
-Consent is stored in the `consents` table with the following dimensions:
+We take security seriously so you don't have to second guess.
 
-```
-User + Client + Scope + Purpose = Consent Record
-```
-
-Each consent is:
-- **User-specific** — User A's consent is independent of User B's
-- **Client-specific** — consent for FitZone is independent of consent for FoodApp
-- **Scope-specific** — consent for `location` is independent of consent for `email`
-- **Purpose-specific** — consent for `personalization` does NOT automatically grant `advertising`
-- **Revocable** — users can revoke consent at any time
-- **Optionally time-limited** — consent can have an expiration date
-
-### Supported Purposes
-`authentication`, `personalization`, `recommendations`, `analytics`, `marketing`, `advertising`
+| Control Area | Implementation |
+|:---|:---|
+| **URI Validation** | Strict checking against registered client redirect URIs. |
+| **Token Security** | Robust JWT sessions via HttpOnly cookies; `node-jose` for JWKS. |
+| **Consent Enforcement** | Every scope is cross-checked against active, non-expired consent records. |
+| **Isolation** | Strict User/Client isolation boundaries enforced at the database level. |
+| **Credential Hygiene**| Access tokens, passwords, and auth codes are **never** stored in logs. |
 
 ---
 
-## Consent Screen
+## 💻 Tech Stack Powering the Platform
 
-When a third-party client requests user data, the user sees a consent screen showing:
-- The client application name
-- The scopes being requested (e.g. "Basic profile information", "Email address", "Approximate location")
-- The purpose (e.g. "Personalization")
-- Allow / Deny buttons
+Built on a modern, high-performance stack designed for scale and developer happiness.
 
-The user must explicitly allow access before any data is shared.
-
----
-
-## UserInfo Authorization
-
-The `/userinfo` endpoint enforces a strict authorization check:
-
-```
-For each requested scope:
-  1. Is the scope in the access token?
-  2. Does an active consent exist for this user + client + scope + purpose?
-  3. Is the consent status = "granted"?
-  4. Is it not revoked (revoked_at IS NULL)?
-  5. Is it not expired (expires_at IS NULL or expires_at > now)?
-     ↓
-  If ALL checks pass → include claims for this scope
-  If ANY check fails  → silently omit claims (no error thrown)
-```
-
-**Formula:** `ALLOWED_CLAIMS = REQUESTED_SCOPES ∩ ACTIVE_CONSENT ∩ MATCHING_PURPOSE`
+- **Language:** TypeScript 
+- **Framework:** Express 5
+- **Database:** PostgreSQL + Drizzle ORM
+- **Security & Crypto:** jsonwebtoken, node-jose, bcrypt, Zod
+- **Tooling:** drizzle-kit, tsc-watch
 
 ---
 
-## Data Minimization
+## 🚀 Get Started Today
 
-The server returns **only** the minimum claims required by authorized scopes:
-
-- If only `location` is requested and authorized → only `city`, `state`, `country`, `locale` are returned
-- `email`, `given_name`, `family_name`, `interests` are **not** returned
-- Internal fields like `location_source`, `location_precision`, database IDs, timestamps, passwords are **never** exposed
-
----
-
-## User Consent Management
-
-Authenticated users can manage their consents via REST APIs:
-
-| Endpoint | Purpose |
-|---|---|
-| `GET /api/consents` | View all granted consents |
-| `GET /api/consents/:id` | View a single consent |
-| `DELETE /api/consents/:id` | Revoke a consent (soft delete: sets `status = revoked`, `revoked_at = now`) |
-
-Users can only access their own consents. Cross-user access returns a 404.
-
----
-
-## Data Access Observability
-
-Every `/userinfo` request creates a record in the `data_access_logs` table:
-
-| Field | Description |
-|---|---|
-| `user_id` | Whose data was accessed |
-| `client_id` | Which client accessed it |
-| `endpoint` | The endpoint called (e.g. `/userinfo`) |
-| `requested_scopes` | Scopes the client requested |
-| `granted_scopes` | Scopes that passed consent checks |
-| `purpose` | The purpose from the consent |
-| `success` | Whether all requested scopes were granted |
-| `denial_reason` | Why any scopes were denied (nullable) |
-| `created_at` | When the access occurred |
-
-**No credentials are ever stored** in the logs (no tokens, passwords, secrets, or authorization codes).
-
----
-
-## User Access History
-
-Users can view their own data access history:
-
-| Endpoint | Purpose |
-|---|---|
-| `GET /api/data-access` | View which apps accessed your data, when, and what was shared |
-
-A simple frontend page at `/data-access` displays this information.
-
----
-
-## Admin Observability Dashboard
-
-An admin-only dashboard at `/admin` shows:
-
-- **Total data-access requests**
-- **Successful vs denied accesses**
-- **Active clients count**
-- **Top 5 clients** (by access count)
-- **Top 5 scopes** (most requested)
-- **Recent 10 data-access events**
-- **Security alerts** (anomaly detection)
-
-Protected by `requireAuth` + `requireAdmin` middleware. Normal users receive a `403 Forbidden`.
-
-| Endpoint | Purpose |
-|---|---|
-| `GET /api/admin/observability` | Aggregated metrics from `data_access_logs` |
-| `GET /api/admin/anomalies` | Current anomaly alerts |
-
----
-
-## Anomaly Detection
-
-Simple rule-based anomaly detection using the existing `data_access_logs` table. **No machine learning or AI is used.**
-
-### Rules
-
-| Rule | Description | Severity |
-|---|---|---|
-| `HIGH_ACCESS_FREQUENCY` | Client makes > 100 requests in 5 minutes | High |
-| `HIGH_DENIAL_RATE` | ≥ 70% of a client's recent requests are denied | Medium/High |
-| `SCOPE_SPIKE` | Client suddenly requests 2x more distinct scopes than historical average | Medium |
-
-Thresholds are configured in `src/modules/admin/anomaly.config.ts`.
-
-**Interview explanation:** "The system analyzes existing data-access logs and applies predefined rules to identify unusual client behavior, such as excessive request rates, high denial rates, or sudden scope escalation."
-
----
-
-## Security Controls
-
-| Control | Implementation |
-|---|---|
-| Redirect URI validation | Checked against registered client redirect URI |
-| Scope validation | Only scopes from the central catalog are accepted |
-| Authentication | JWT-based session via HttpOnly cookies |
-| Consent validation | Every scope checked against active consent records |
-| Purpose validation | Consent must match the specific purpose in the access token |
-| User/client isolation | Users can only access their own data; clients only get their authorized data |
-| Admin authorization | Admin endpoints protected by `requireAuth` + `requireAdmin` |
-| Data minimization | Only authorized scope claims are returned; internal fields never exposed |
-| No credential logging | Access tokens, passwords, secrets, and authorization codes are never stored in logs |
-
----
-
-## Technology Stack
-
-| Technology | Usage |
-|---|---|
-| **TypeScript** | Server-side language |
-| **Express 5** | HTTP framework |
-| **PostgreSQL** | Database |
-| **Drizzle ORM** | Database queries and schema management |
-| **JSON Web Tokens (jsonwebtoken)** | Access tokens, ID tokens |
-| **node-jose** | JWKS endpoint |
-| **bcrypt** | Password hashing |
-| **Zod** | Request validation |
-| **nodemailer** | Password reset emails |
-| **cookie-parser** | Session cookie management |
-| **date-fns** | Date utilities |
-| **dotenv** | Environment variables |
-| **drizzle-kit** | Database migrations |
-| **tsc-watch** | Development hot reload |
-
----
-
-## Project Structure
-
-```
-src/
-├── common/
-│   ├── db/                          # Database schemas and connection
-│   │   ├── user.schema.ts
-│   │   ├── clients.schema.ts
-│   │   ├── authorization-codes.schema.ts
-│   │   ├── user-profiles.schema.ts
-│   │   ├── user-interests.schema.ts
-│   │   ├── consents.schema.ts
-│   │   ├── data-access-logs.schema.ts
-│   │   └── index.ts
-│   ├── middleware/
-│   │   ├── requireAuth.ts           # JWT authentication middleware
-│   │   └── requireAdmin.ts          # Admin authorization middleware
-│   └── utils/
-│       ├── jwt.utils.ts             # Token generation/verification
-│       └── cert.ts                  # JWKS key management
-├── modules/
-│   ├── auth/                        # Signup, login, password reset
-│   ├── clients/                     # Client registration
-│   ├── oidc/                        # Core OIDC endpoints
-│   │   ├── oidc.services.ts         # authorize, token, userinfo, saveConsent
-│   │   ├── oidc.controller.ts
-│   │   ├── oidc.routes.ts
-│   │   └── oidc.scopes.ts           # Central scope + claim + purpose catalog
-│   ├── authorization-codes/         # Auth code creation/lookup
-│   ├── consents/                    # User consent management APIs
-│   ├── data-access/                 # User data-access history API
-│   └── admin/                       # Admin observability + anomaly detection
-│       ├── admin.services.ts
-│       ├── admin.controller.ts
-│       ├── admin.routes.ts
-│       ├── anomaly.services.ts
-│       └── anomaly.config.ts
-├── index.ts                         # Express app setup and route mounting
-public/
-├── consent.html                     # Consent screen
-├── data-access.html                 # User data-access history page
-├── admin.html                       # Admin dashboard
-├── js/
-│   ├── consent.js
-│   ├── data-access.js
-│   └── admin.js
-```
-
----
-
-## Interview Explanation
-
-> "I built Maheshwari Auth — a generic OIDC authentication and authorization server that allows third-party applications to authenticate users and request specific user data. The system uses a central scope-and-claim catalog to define what data each scope represents. Users explicitly provide consent for specific scopes and purposes through a consent screen, and the server enforces data minimization by returning only the claims that are both requested and consented. I implemented user consent management APIs so users can view and revoke permissions, a data-access observability layer that logs every access event, a user-facing access history page, an admin observability dashboard with aggregated metrics, and simple rule-based anomaly detection to flag suspicious client behavior like excessive request rates or high denial rates. The entire system is built with TypeScript, Express, PostgreSQL, and Drizzle ORM, and is designed to be domain-agnostic so any type of application can use it."
-
----
-
-## Running the Project
+Ready to integrate trust into your ecosystem? Spin up Maheshwari Auth in seconds.
 
 ```bash
-# Install dependencies
+# 1. Install dependencies
 npm install
 
-# Generate database migrations
+# 2. Setup your database schemas
 npm run db:generate
 
-# Apply migrations
+# 3. Apply the migrations
 npm run db:migrate
 
-# Start development server
+# 4. Ignite the development server
 npm run dev
-
-# Build for production
-npm run build
 ```
 
-### Environment Variables
+### ⚙️ Environment Configuration
 
-Create a `.env` file with:
+Create a `.env` file in the root directory and you're ready to go:
 
-```
+```env
 PORT=3000
-DATABASE_URL=postgresql://...
-JWT_ACCESS_SECRET=your-access-secret
-JWT_REFRESH_SECRET=your-refresh-secret
+DATABASE_URL=postgresql://user:pass@localhost:5432/maheshwari_auth
+JWT_ACCESS_SECRET=your-super-secure-access-secret
+JWT_REFRESH_SECRET=your-super-secure-refresh-secret
 ISSUER=http://localhost:3000
 ```
+
+---
+
+<div align="center">
+  <p>Built with ❤️ by <strong>Maheshwari Auth</strong></p>
+  <p><em>Empowering privacy-first digital experiences.</em></p>
+</div>
