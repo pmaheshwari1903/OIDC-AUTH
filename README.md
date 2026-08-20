@@ -1,150 +1,407 @@
-<div align="center">
-  <h1>🛡️ Maheshwari Auth</h1>
-  <p><strong>The Next-Generation, Domain-Agnostic OIDC Identity Platform</strong></p>
-  
-  <p>
-    <img src="https://img.shields.io/badge/TypeScript-007ACC?style=for-the-badge&logo=typescript&logoColor=white" alt="TypeScript" />
-    <img src="https://img.shields.io/badge/Express.js-404D59?style=for-the-badge&logo=express&logoColor=white" alt="Express.js" />
-    <img src="https://img.shields.io/badge/PostgreSQL-316192?style=for-the-badge&logo=postgresql&logoColor=white" alt="PostgreSQL" />
-    <img src="https://img.shields.io/badge/Drizzle-C5F74F?style=for-the-badge&logo=drizzle&logoColor=black" alt="Drizzle ORM" />
-  </p>
+<p align="center">
+  <img src="https://img.shields.io/badge/Maheshwari_Auth-Identity_Provider-blueviolet?style=for-the-badge&logo=openid&logoColor=white" alt="Maheshwari Auth"/>
+  <img src="https://img.shields.io/badge/OAuth_2.0-Secure-success?style=for-the-badge&logo=auth0&logoColor=white" alt="OAuth 2.0"/>
+  <img src="https://img.shields.io/badge/OpenID_Connect-Certified-blue?style=for-the-badge&logo=openid&logoColor=white" alt="OIDC"/>
+</p>
 
-  <p>
-    <em>Secure, transparent, and built for privacy. Give your users the confidence to share data with third-party applications while keeping full control.</em>
-  </p>
-</div>
+<h1 align="center">🔐 Maheshwari Auth</h1>
 
----
+<p align="center">
+  <b>Secure, standards-compliant authentication for your website.</b><br/>
+  Just like "Sign in with Google" — but powered by Maheshwari Auth.<br/>
+  Add a trusted sign-in experience to your app in minutes.
+</p>
 
-## 🚀 Why Maheshwari Auth?
+<p align="center">
+  <a href="#-why-maheshwari-auth">Why Us</a> •
+  <a href="#-get-started-in-3-steps">Get Started</a> •
+  <a href="#-integration-guide">Integration Guide</a> •
+  <a href="#-code-examples">Code Examples</a> •
+  <a href="#-api-reference">API Reference</a> •
+  <a href="#-scopes--user-data">Scopes & Data</a> •
+  <a href="#-join-the-community">Community</a>
+</p>
 
-In today's digital ecosystem, users demand privacy and transparency. Maheshwari Auth isn't just an authentication server; it's a **trust engine** for your platform.
-
-Whether you're building an ecosystem for food delivery, fitness apps, e-commerce, OTT platforms, or education tools, Maheshwari Auth empowers third-party applications to authenticate users and request specific data—with uncompromising security and privacy.
-
-### ✨ The Maheshwari Advantage:
-- 🔐 **Explicit User Consent:** Users always know exactly what data they're sharing, to whom, and why.
-- 🎯 **Purpose-Based Privacy:** Granular permissions tied to specific use cases (e.g., personalization vs. marketing).
-- 📉 **Data Minimization by Default:** We return only the absolute minimum claims authorized. Nothing more, ever.
-- 👁️ **Total Observability:** Complete transparency into data-access logs for both end-users and administrators.
-- 🛡️ **Built-in Anomaly Detection:** Real-time, rule-based security monitoring to guard against malicious client behavior.
+<br/>
 
 ---
 
-## 🏗️ Architecture at a Glance
+## 🌟 Why Maheshwari Auth?
 
-Maheshwari Auth sits securely between your users and third-party applications, ensuring that every data exchange is verified, authorized, and logged.
+Stop building authentication from scratch. Let Maheshwari Auth handle sign-in, sign-up, email verification, and user management so you can **focus on your product**.
 
-```mermaid
-graph TD
-    A[User Browser] -->|Authenticates & Consents| B(Maheshwari Auth Server)
-    B -->|Issues Tokens| C[Third-Party Application]
-    C -->|Requests /userinfo with Token| B
-    B -->|Returns Minimized Data| C
+| ✅ Feature | 💡 What You Get |
+|---|---|
+| **"Sign in with Maheshwari Auth"** | A trusted, branded login experience for your users |
+| **Email Verification Built-In** | Every user's email is verified — no spam accounts |
+| **Secure OAuth 2.0 Flow** | Industry-standard Authorization Code flow |
+| **User Profiles** | Get name, email, and profile picture out of the box |
+| **RS256 Token Signing** | Tokens signed with RSA keys — verify them with our public JWKS |
+| **Zero Cost** | Completely free to integrate into your website |
+
+---
+
+## ⚡ Get Started in 3 Steps
+
+```
+1️⃣  Register your app → get your Client ID & Secret
+2️⃣  Add a "Sign in with Maheshwari Auth" button to your site
+3️⃣  Handle the callback → receive user data
 ```
 
-### 🔄 The Seamless Authentication Flow
-1. **Signup / Login**: The user establishes their core identity.
-2. **Authorize**: Client requests specific scopes (e.g., `profile`, `location`) and a purpose.
-3. **Consent Screen**: User reviews the request and clicks Allow/Deny.
-4. **Code Exchange**: Secure authorization code is exchanged for an Access Token.
-5. **Data Access**: Client calls `/userinfo`, and the server enforces strict data minimization before returning data.
+That's it. Your users can now sign in securely through Maheshwari Auth. 🎉
 
 ---
 
-## 💎 Features Built for Enterprise Trust
+## 🔄 How It Works
 
-### 1. Granular Scope & Claim Catalog
-Our centralized catalog maps scopes perfectly to actionable claims, ensuring clients get exactly what they need without over-fetching.
+Just like Google or GitHub OAuth — a simple redirect-based flow:
 
-| Scope | Claims Returned |
-|:---|:---|
-| `openid` | `sub` (Always included) |
-| `profile` | `given_name`, `family_name`, `picture` |
-| `email` | `email` |
-| `location` | `city`, `state`, `country`, `locale` |
-| `interests` | `interests` |
+```
+┌──────────────┐                              ┌──────────────────┐
+│              │  1. User clicks "Sign In"     │                  │
+│  Your App    │ ─────────────────────────────►│  Maheshwari Auth  │
+│              │                               │                  │
+│              │  2. User signs in/signs up     │  We handle:      │
+│              │     on our secure page         │  • Sign-in UI    │
+│              │                               │  • Sign-up UI    │
+│              │  3. Redirected back with code  │  • Email verify  │
+│              │◄─────────────────────────────  │  • Password hash │
+│              │                               │                  │
+│              │  4. Exchange code for tokens   │                  │
+│              │ ─────────────────────────────►│                  │
+│              │                               │                  │
+│              │  5. Get user profile           │                  │
+│              │◄─────────────────────────────  │                  │
+└──────────────┘                              └──────────────────┘
+```
 
-### 2. Multi-Dimensional Consent System
-Consent isn't just a simple toggle. It's a precise contract:
-`User` + `Client` + `Scope` + `Purpose` = **Consent Record**
-
-- **Client-specific:** Permissions for App A don't apply to App B.
-- **Purpose-specific:** Granting access for `personalization` doesn't grant access for `advertising`.
-- **Revocable & Expirable:** Users maintain lifetime control over their data.
-
-### 3. Absolute Data Minimization
-If a client requests `location`, they get `location`—and absolutely nothing else. Internal database IDs, timestamps, and credential hashes are **never** exposed.
-
-### 4. Panoptic Observability & Anomaly Detection
-Every single `/userinfo` request is logged (without ever storing credentials). 
-- **Users** get a beautiful dashboard to see exactly who accessed their data and when.
-- **Admins** get a powerful observability suite featuring rule-based anomaly detection to automatically flag:
-  - 🚨 **High Access Frequency** (>100 requests / 5 mins)
-  - 🚨 **High Denial Rates** (Suspicious probing)
-  - 🚨 **Scope Spikes** (Sudden aggressive data requests)
+> 💡 **You never handle passwords.** All authentication happens on our secure servers.
 
 ---
 
-## 🛠️ Uncompromising Security Controls
+## 🚀 Integration Guide
 
-We take security seriously so you don't have to second guess.
+### Step 1 — Register Your Application
 
-| Control Area | Implementation |
-|:---|:---|
-| **URI Validation** | Strict checking against registered client redirect URIs. |
-| **Token Security** | Robust JWT sessions via HttpOnly cookies; `node-jose` for JWKS. |
-| **Consent Enforcement** | Every scope is cross-checked against active, non-expired consent records. |
-| **Isolation** | Strict User/Client isolation boundaries enforced at the database level. |
-| **Credential Hygiene**| Access tokens, passwords, and auth codes are **never** stored in logs. |
+Head over to the **Maheshwari Auth Registration Portal** and register your app:
 
----
+### 👉 [**Register Your App Here →**](https://oidcauth.vercel.app/register)
 
-## 💻 Tech Stack Powering the Platform
+Fill in your **App Name** and **Redirect URI** (the URL where users will be sent after signing in). Once submitted, you'll receive:
 
-Built on a modern, high-performance stack designed for scale and developer happiness.
+```json
+{
+  "clientId": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+  "clientSecret": "your-secret-token-save-it-now"
+}
+```
 
-- **Language:** TypeScript 
-- **Framework:** Express 5
-- **Database:** PostgreSQL + Drizzle ORM
-- **Security & Crypto:** jsonwebtoken, node-jose, bcrypt, Zod
-- **Tooling:** drizzle-kit, tsc-watch
+> ⚠️ **The `clientSecret` is shown only once.** Copy it immediately and store it securely in your environment variables.
 
 ---
 
-## 🚀 Get Started Today
+### Step 2 — Add a "Sign In" Button
 
-Ready to integrate trust into your ecosystem? Spin up Maheshwari Auth in seconds.
+When a user wants to sign in, redirect them to Maheshwari Auth:
+
+```
+https://oidcauth.vercel.app/authorize
+    ?client_id=YOUR_CLIENT_ID
+    &redirect_uri=https://myapp.com/auth/callback
+    &response_type=code
+    &scope=openid profile email
+    &state=random_csrf_token
+```
+
+| Parameter | Required | Description |
+|---|---|---|
+| `client_id` | ✅ | Your Client ID from Step 1 |
+| `redirect_uri` | ✅ | Must **exactly** match what you registered |
+| `response_type` | ✅ | Always `code` |
+| `scope` | ✅ | Must include `openid`. Add `profile` and/or `email` for more data |
+| `state` | Recommended | A random string for CSRF protection |
+
+The user will see our sign-in page. After authenticating, we redirect them back to your `redirect_uri`:
+
+```
+https://myapp.com/auth/callback?code=AUTH_CODE&state=random_csrf_token
+```
+
+---
+
+### Step 3 — Exchange the Code for Tokens
+
+On your **server-side**, exchange the authorization code:
 
 ```bash
-# 1. Install dependencies
-npm install
-
-# 2. Setup your database schemas
-npm run db:generate
-
-# 3. Apply the migrations
-npm run db:migrate
-
-# 4. Ignite the development server
-npm run dev
+curl -X POST https://oidcauth.vercel.app/token \
+  -H "Content-Type: application/json" \
+  -d '{
+    "client_id": "YOUR_CLIENT_ID",
+    "client_secret": "YOUR_CLIENT_SECRET",
+    "code": "AUTH_CODE_FROM_CALLBACK",
+    "redirect_uri": "https://myapp.com/auth/callback"
+  }'
 ```
 
-### ⚙️ Environment Configuration
+**Response:**
 
-Create a `.env` file in the root directory and you're ready to go:
+```json
+{
+  "access_token": "eyJhbGciOiJIUzI1NiIs...",
+  "id_token": "eyJhbGciOiJIUzI1NiIs...",
+  "token_type": "Bearer",
+  "expires_in": 900
+}
+```
 
-```env
-PORT=3000
-DATABASE_URL=postgresql://user:pass@localhost:5432/maheshwari_auth
-JWT_ACCESS_SECRET=your-super-secure-access-secret
-JWT_REFRESH_SECRET=your-super-secure-refresh-secret
-ISSUER=http://localhost:3000
+> 🔒 **Never expose your `client_secret` on the frontend.** This call must be made from your backend server.
+
+---
+
+### Step 4 — Get the User's Profile
+
+Use the `access_token` to fetch user info:
+
+```bash
+curl https://oidcauth.vercel.app/userinfo \
+  -H "Authorization: Bearer ACCESS_TOKEN"
+```
+
+**Response:**
+
+```json
+{
+  "sub": "unique-user-id",
+  "email": "user@example.com",
+  "given_name": "John",
+  "family_name": "Doe",
+  "picture": "https://example.com/avatar.jpg"
+}
+```
+
+Now create a session for the user in your app — you're done! 🎉
+
+---
+
+## 💻 Code Examples
+
+### Next.js / React
+
+**Sign-in Button (Frontend):**
+
+```tsx
+const MAHESHWARI_AUTH = "https://oidcauth.vercel.app";
+
+function SignInButton() {
+  const handleSignIn = () => {
+    const params = new URLSearchParams({
+      client_id: process.env.NEXT_PUBLIC_CLIENT_ID!,
+      redirect_uri: `${window.location.origin}/api/auth/callback`,
+      response_type: "code",
+      scope: "openid profile email",
+      state: crypto.randomUUID(),
+    });
+
+    window.location.href = `${MAHESHWARI_AUTH}/authorize?${params}`;
+  };
+
+  return (
+    <button onClick={handleSignIn}>
+      🔐 Sign in with Maheshwari Auth
+    </button>
+  );
+}
+```
+
+**Callback Handler (Backend API Route):**
+
+```typescript
+// app/api/auth/callback/route.ts
+import { NextRequest, NextResponse } from "next/server";
+
+const AUTH_SERVER = "https://oidcauth.vercel.app";
+
+export async function GET(req: NextRequest) {
+  const code = req.nextUrl.searchParams.get("code");
+
+  // Exchange code for tokens
+  const tokenRes = await fetch(`${AUTH_SERVER}/token`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      client_id: process.env.OIDC_CLIENT_ID,
+      client_secret: process.env.OIDC_CLIENT_SECRET,
+      code,
+      redirect_uri: `${process.env.NEXT_PUBLIC_APP_URL}/api/auth/callback`,
+    }),
+  });
+  const tokens = await tokenRes.json();
+
+  // Get user profile
+  const userRes = await fetch(`${AUTH_SERVER}/userinfo`, {
+    headers: { Authorization: `Bearer ${tokens.access_token}` },
+  });
+  const user = await userRes.json();
+
+  // Create your session, set cookies, etc.
+  // user.sub → unique user ID
+  // user.email → verified email
+  // user.given_name, user.family_name → display name
+
+  return NextResponse.redirect(new URL("/dashboard", req.url));
+}
 ```
 
 ---
 
-<div align="center">
-  <p>Built with ❤️ by <strong>Maheshwari Auth</strong></p>
-  <p><em>Empowering privacy-first digital experiences.</em></p>
-</div>
+### Express.js
+
+```javascript
+const express = require("express");
+const app = express();
+
+const AUTH_SERVER = "https://oidc-auth-iota.vercel.app";
+
+// Redirect to Maheshwari Auth
+app.get("/login", (req, res) => {
+  const params = new URLSearchParams({
+    client_id: process.env.CLIENT_ID,
+    redirect_uri: "http://localhost:3000/auth/callback",
+    response_type: "code",
+    scope: "openid profile email",
+    state: Math.random().toString(36).substring(7),
+  });
+
+  res.redirect(`${AUTH_SERVER}/authorize?${params}`);
+});
+
+// Handle callback
+app.get("/auth/callback", async (req, res) => {
+  const { code } = req.query;
+
+  // Exchange code for tokens
+  const tokenRes = await fetch(`${AUTH_SERVER}/token`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      client_id: process.env.CLIENT_ID,
+      client_secret: process.env.CLIENT_SECRET,
+      code,
+      redirect_uri: "http://localhost:3000/auth/callback",
+    }),
+  });
+  const tokens = await tokenRes.json();
+
+  // Get user info
+  const userRes = await fetch(`${AUTH_SERVER}/userinfo`, {
+    headers: { Authorization: `Bearer ${tokens.access_token}` },
+  });
+  const user = await userRes.json();
+
+  // Create session and redirect
+  req.session.user = user;
+  res.redirect("/dashboard");
+});
+```
+
+---
+
+## 📖 API Reference
+
+> **Base URL:** `https://oidc-auth-iota.vercel.app`
+
+### Discovery
+
+| Method | Endpoint | Description |
+|---|---|---|
+| `GET` | `/.well-known/openid-configuration` | OIDC discovery — lists all endpoints & capabilities |
+| `GET` | `/.well-known/jwks.json` | Public keys to verify token signatures |
+
+### OAuth / OIDC Flow
+
+| Method | Endpoint | Description |
+|---|---|---|
+| `GET` | `/authorize` | Start the sign-in flow — redirect users here |
+| `POST` | `/token` | Exchange authorization code for `access_token` + `id_token` |
+| `GET` | `/userinfo` | Get the signed-in user's profile (requires Bearer token) |
+
+### Client Registration
+
+| Action | Link | Description |
+|---|---|---|
+| 🔗 **Register** | [**oidcauth.vercel.app/register**](https://oidcauth.vercel.app/register) | Register your app to get `clientId` and `clientSecret` |
+
+---
+
+## 🔐 Scopes & User Data
+
+Choose which data your app can access:
+
+| Scope | Claims Returned | Description |
+|---|---|---|
+| `openid` | `sub` | **Required.** Returns the unique user identifier |
+| `profile` | `given_name`, `family_name`, `picture` | User's name and profile picture |
+| `email` | `email`, `email_verified` | User's verified email address |
+
+**Example scope string:** `openid profile email`
+
+---
+
+## ❓ FAQ
+
+<details>
+<summary><b>Is Maheshwari Auth free to use?</b></summary>
+<br/>
+Yes! It's completely free for any website or application.
+</details>
+
+<details>
+<summary><b>Do I need to handle password storage?</b></summary>
+<br/>
+No. All passwords are securely hashed and stored on our servers. You never see or touch user passwords.
+</details>
+
+<details>
+<summary><b>How is this different from Firebase Auth or Auth0?</b></summary>
+<br/>
+Maheshwari Auth is a lightweight, open-standard OIDC provider. No vendor lock-in, no complex SDKs. Just standard HTTP requests that work with any language or framework.
+</details>
+
+<details>
+<summary><b>Can I use this with any framework?</b></summary>
+<br/>
+Yes! If your framework supports OAuth 2.0 / OpenID Connect (virtually all do), it works. We've shown examples with Next.js and Express, but it works with Django, Flask, Spring Boot, Laravel, Rails — anything.
+</details>
+
+<details>
+<summary><b>What happens if a user forgets their password?</b></summary>
+<br/>
+Password recovery is handled on the Maheshwari Auth side — your app doesn't need to worry about it.
+</details>
+
+<details>
+<summary><b>Are emails verified?</b></summary>
+<br/>
+Yes! Every user must verify their email before they can sign in. The <code>email_verified</code> claim in the user profile will always be <code>true</code>.
+</details>
+
+---
+
+## 🤝 Join the Community
+
+Become part of the **Maheshwari Auth ecosystem** and let your users sign in with a trusted identity:
+
+- 🌐 **Integrate** — Add "Sign in with Maheshwari Auth" to your website
+- 💬 **Connect** — Share your integration and get featured
+- ⭐ **Support** — Star the repo on [GitHub](https://github.com/pmaheshwari1903/OIDC-AUTH) if Maheshwari Auth helped you!
+- 🐛 **Report Issues** — Found a bug? [Open an issue](https://github.com/pmaheshwari1903/OIDC-AUTH/issues)
+
+---
+
+<p align="center">
+  <b>Built with ❤️ by <a href="https://github.com/pmaheshwari1903">Parth Maheshwari</a></b>
+  <br/><br/>
+  <i>Empowering developers with simple, secure authentication.</i>
+</p>
