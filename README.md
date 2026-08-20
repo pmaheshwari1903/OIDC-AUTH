@@ -38,6 +38,7 @@ Stop building authentication from scratch. Let Maheshwari Auth handle sign-in, s
 | **User Profiles** | Get name, email, and profile picture out of the box |
 | **RS256 Token Signing** | Tokens signed with RSA keys — verify them with our public JWKS |
 | **Zero Cost** | Completely free to integrate into your website |
+| **Admin Observability Tool** | Monitor data access, detect anomalies, and track client activity |
 
 ---
 
@@ -50,6 +51,16 @@ Stop building authentication from scratch. Let Maheshwari Auth handle sign-in, s
 ```
 
 That's it. Your users can now sign in securely through Maheshwari Auth. 🎉
+
+---
+
+## 📊 Admin Observability Tool
+
+Maheshwari Auth goes beyond basic authentication by providing a built-in **Admin Observability Dashboard** (`/admin`). This tool gives platform administrators complete visibility into data sharing:
+
+- **Real-Time Data Access Logs**: See exactly which third-party applications are requesting data and what specific scopes (`profile`, `email`, etc.) they are accessing.
+- **Automated Anomaly Detection**: Built-in security rules automatically flag suspicious behavior, such as a single client suddenly requesting too many scopes or experiencing high denial rates.
+- **Client Analytics**: Monitor your ecosystem's health by tracking your top clients and the most frequently requested user data.
 
 ---
 
@@ -397,6 +408,14 @@ Become part of the **Maheshwari Auth ecosystem** and let your users sign in with
 - 💬 **Connect** — Share your integration and get featured
 - ⭐ **Support** — Star the repo on [GitHub](https://github.com/pmaheshwari1903/OIDC-AUTH) if Maheshwari Auth helped you!
 - 🐛 **Report Issues** — Found a bug? [Open an issue](https://github.com/pmaheshwari1903/OIDC-AUTH/issues)
+
+---
+
+## 🛠️ Internal Architecture & Development
+
+Curious about how Maheshwari Auth was built? Check out our comprehensive developer guide which includes **Step 1 to 10 of our build process**, the complete file structure, and database schemas!
+
+👉 [**Read the Project Documentation**](./PROJECT_DOCUMENTATION.md)
 
 ---
 
