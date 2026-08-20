@@ -291,7 +291,7 @@ export async function GET(req: NextRequest) {
 
 ## 📖 API Reference
 
-> **Base URL:** `https://oidcauth.vercel.app/register`
+> **Base URL:** `https://oidcauth.vercel.app`
 
 ### Discovery
 
