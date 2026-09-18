@@ -321,126 +321,32 @@
     <div class="container">
         <div class="card">
             <div class="header">
-                <h1 id="pageTitle">Client Management</h1>
-                <p id="pageSubtitle">Register or update OAuth 2.0 / OIDC client applications</p>
+                <h1 id="pageTitle">Client Registration</h1>
+                <p id="pageSubtitle">Register a new OAuth 2.0 / OIDC client application</p>
             </div>
 
-            <!-- Tab Switcher -->
-            <div class="tab-nav">
-                <button type="button" class="tab-btn active" id="tabRegisterBtn" onclick="switchTab('register')">Register New Client</button>
-                <button type="button" class="tab-btn" id="tabManageBtn" onclick="switchTab('manage')">Manage Existing Client</button>
-            </div>
-
-            <!-- TAB 1: Register New Client -->
-            <div id="registerPane" class="tab-pane active">
-                <form id="registerForm">
-                    <div class="form-group">
-                        <label for="appName">Application Name</label>
-                        <input type="text" id="appName" placeholder="e.g. Employee Referral SaaS" required />
-                    </div>
-
-                    <div class="form-group">
-                        <label for="redirectUri">Callback URL (Redirect URI)</label>
-                        <input type="url" id="redirectUri" placeholder="http://localhost:3000/api/auth/callback" required />
-                    </div>
-
-                    <button type="submit" id="submitBtn">Generate Credentials</button>
-                </form>
-
-                <div id="resultBox" class="result-box">
-                    <!-- Results rendered via JS -->
+            <form id="registerForm">
+                <div class="form-group">
+                    <label for="appName">Application Name</label>
+                    <input type="text" id="appName" placeholder="e.g. Employee Referral SaaS" required />
                 </div>
-            </div>
 
-            <!-- TAB 2: Manage Existing Client -->
-            <div id="managePane" class="tab-pane">
-                <!-- Search / Lookup Form -->
-                <form id="lookupForm">
-                    <div class="form-group">
-                        <label for="lookupClientId">Registered Client ID</label>
-                        <input type="text" id="lookupClientId" placeholder="e.g. 729bfec1-5f91-43ea-badf-528d663631af" required />
-                    </div>
-                    <button type="submit" id="lookupBtn">Fetch Client Configuration</button>
-                </form>
-
-                <!-- Edit Form (Hidden until loaded) -->
-                <div id="editClientSection" style="display: none; margin-top: 1.5rem;">
-                    <hr style="border: 0; border-top: 1px solid var(--border-color); margin-bottom: 1.5rem;" />
-
-                    <form id="updateForm">
-                        <div class="form-group">
-                            <label>Client ID (Immutable)</label>
-                            <div class="readonly-field" id="displayClientId"></div>
-                        </div>
-
-                        <div class="form-group">
-                            <label for="editAppName">Application Name</label>
-                            <input type="text" id="editAppName" required />
-                        </div>
-
-                        <div class="form-group">
-                            <label for="editRedirectUri">
-                                Callback / Redirect URI
-                            </label>
-                            <div style="margin-bottom: 6px;">
-                                <span class="current-val" id="currentUriLabel">Current: ...</span>
-                            </div>
-                            <input type="url" id="editRedirectUri" required />
-                        </div>
-
-                        <div class="form-group">
-                            <label for="authSecretInput">Authorization Secret (Optional if logged in)</label>
-                            <input type="password" id="authSecretInput" placeholder="Enter Client Secret if not logged in" />
-                            <div class="info-pill">
-                                🔒 Client Secret is encrypted & never revealed again.
-                            </div>
-                        </div>
-
-                        <button type="submit" id="saveBtn">Save Changes</button>
-                    </form>
-
-                    <div id="manageResultBox" class="result-box">
-                        <!-- Update results rendered via JS -->
-                    </div>
+                <div class="form-group">
+                    <label for="redirectUri">Callback URL (Redirect URI)</label>
+                    <input type="url" id="redirectUri" placeholder="http://localhost:3000/api/auth/callback" required />
                 </div>
+
+                <button type="submit" id="submitBtn">Generate Credentials</button>
+            </form>
+
+            <div id="resultBox" class="result-box">
+                <!-- Results rendered via JS -->
             </div>
 
         </div>
     </div>
 
     <script>
-        // Tab switching
-        function switchTab(tab) {
-            const regBtn = document.getElementById('tabRegisterBtn');
-            const manBtn = document.getElementById('tabManageBtn');
-            const regPane = document.getElementById('registerPane');
-            const manPane = document.getElementById('managePane');
-
-            if (tab === 'manage') {
-                regBtn.classList.remove('active');
-                manBtn.classList.add('active');
-                regPane.classList.remove('active');
-                manPane.classList.add('active');
-            } else {
-                manBtn.classList.remove('active');
-                regBtn.classList.add('active');
-                manPane.classList.remove('active');
-                regPane.classList.add('active');
-            }
-        }
-
-        // Auto-switch tab if url contains #manage or ?tab=manage or ?clientId=
-        const urlParams = new URLSearchParams(window.location.search);
-        if (urlParams.get('tab') === 'manage' || urlParams.get('clientId') || window.location.hash === '#manage' || window.location.pathname.includes('manage')) {
-            switchTab('manage');
-            const cid = urlParams.get('clientId');
-            if (cid) {
-                document.getElementById('lookupClientId').value = cid;
-                setTimeout(() => loadClient(cid), 100);
-            }
-        }
-
-        // TAB 1: Register Form
         const regForm = document.getElementById('registerForm');
         const submitBtn = document.getElementById('submitBtn');
         const resultBox = document.getElementById('resultBox');
@@ -492,9 +398,6 @@
                             Your Client Secret is displayed <strong>only this one time</strong> and cannot be retrieved later. Copy and store it securely in your environment variables before closing this page.
                         </div>
                     </div>
-                    <button type="button" class="secondary-btn" onclick="prefillManage('${data.client.clientId}')">
-                        ⚙️ Manage This Client Configuration
-                    </button>
                 `;
             } catch (err) {
                 resultBox.classList.add('error');
@@ -506,154 +409,6 @@
                 resultBox.style.display = 'block';
                 submitBtn.textContent = 'Generate Credentials';
                 submitBtn.classList.remove('loading');
-            }
-        });
-
-        function prefillManage(clientId) {
-            switchTab('manage');
-            document.getElementById('lookupClientId').value = clientId;
-            loadClient(clientId);
-        }
-
-        // TAB 2: Lookup Client
-        const lookupForm = document.getElementById('lookupForm');
-        const lookupBtn = document.getElementById('lookupBtn');
-        const editClientSection = document.getElementById('editClientSection');
-        const displayClientId = document.getElementById('displayClientId');
-        const editAppName = document.getElementById('editAppName');
-        const currentUriLabel = document.getElementById('currentUriLabel');
-        const editRedirectUri = document.getElementById('editRedirectUri');
-        const updateForm = document.getElementById('updateForm');
-        const saveBtn = document.getElementById('saveBtn');
-        const manageResultBox = document.getElementById('manageResultBox');
-
-        lookupForm.addEventListener('submit', (e) => {
-            e.preventDefault();
-            const clientId = document.getElementById('lookupClientId').value.trim();
-            if (clientId) {
-                loadClient(clientId);
-            }
-        });
-
-        async function loadClient(clientId) {
-            lookupBtn.textContent = 'Loading...';
-            lookupBtn.classList.add('loading');
-            manageResultBox.style.display = 'none';
-
-            try {
-                // Try /api/clients/:clientId or /clients/:clientId
-                let response = await fetch(`/api/clients/${encodeURIComponent(clientId)}`);
-                if (!response.ok) {
-                    response = await fetch(`/clients/${encodeURIComponent(clientId)}`);
-                }
-                const data = await response.json();
-
-                if (!response.ok) {
-                    throw new Error(data.message || 'Client not found');
-                }
-
-                const client = data.client || data;
-
-                displayClientId.textContent = client.clientId;
-                editAppName.value = client.applicationName || client.name || '';
-                currentUriLabel.textContent = `Current: ${client.redirectUri || 'None'}`;
-                editRedirectUri.value = client.redirectUri || '';
-
-                editClientSection.style.display = 'block';
-            } catch (err) {
-                editClientSection.style.display = 'block';
-                manageResultBox.className = 'result-box error';
-                manageResultBox.innerHTML = `
-                    <h3>❌ Error</h3>
-                    <p>${err.message}</p>
-                `;
-                manageResultBox.style.display = 'block';
-            } finally {
-                lookupBtn.textContent = 'Fetch Client Configuration';
-                lookupBtn.classList.remove('loading');
-            }
-        }
-
-        // TAB 2: Save Changes
-        updateForm.addEventListener('submit', async (e) => {
-            e.preventDefault();
-
-            const clientId = displayClientId.textContent.trim();
-            const applicationName = editAppName.value.trim();
-            const redirectUri = editRedirectUri.value.trim();
-            const authSecret = document.getElementById('authSecretInput').value.trim();
-
-            saveBtn.textContent = 'Saving Changes...';
-            saveBtn.classList.add('loading');
-            manageResultBox.style.display = 'none';
-            manageResultBox.className = 'result-box';
-
-            try {
-                const headers = {
-                    'Content-Type': 'application/json'
-                };
-                if (authSecret) {
-                    headers['x-client-secret'] = authSecret;
-                    headers['Authorization'] = `Bearer ${authSecret}`;
-                }
-
-                let response = await fetch(`/api/clients/${encodeURIComponent(clientId)}`, {
-                    method: 'PATCH',
-                    headers,
-                    body: JSON.stringify({ applicationName, redirectUri })
-                });
-
-                if (response.status === 404) {
-                    response = await fetch(`/clients/${encodeURIComponent(clientId)}`, {
-                        method: 'PATCH',
-                        headers,
-                        body: JSON.stringify({ applicationName, redirectUri })
-                    });
-                }
-
-                const data = await response.json();
-
-                if (!response.ok) {
-                    throw new Error(data.message || 'Failed to update client');
-                }
-
-                const updated = data.client || data;
-
-                currentUriLabel.textContent = `Current: ${updated.redirectUri}`;
-                editRedirectUri.value = updated.redirectUri;
-                editAppName.value = updated.applicationName || updated.name;
-
-                manageResultBox.className = 'result-box';
-                manageResultBox.innerHTML = `
-                    <h3>✅ Application Updated Successfully!</h3>
-                    <div class="credentials">
-                        <div class="credential-item">
-                            <div class="credential-label">Application Name</div>
-                            <div class="credential-value">${updated.applicationName || updated.name}</div>
-                        </div>
-                        <div class="credential-item">
-                            <div class="credential-label">Client ID (Unchanged)</div>
-                            <div class="credential-value">${updated.clientId}</div>
-                        </div>
-                        <div class="credential-item">
-                            <div class="credential-label">Updated Callback URI</div>
-                            <div class="credential-value">${updated.redirectUri}</div>
-                        </div>
-                    </div>
-                    <div class="info-pill" style="margin-top: 12px; display: block; text-align: center;">
-                        🔒 Client Secret remains intact and was never exposed.
-                    </div>
-                `;
-            } catch (err) {
-                manageResultBox.className = 'result-box error';
-                manageResultBox.innerHTML = `
-                    <h3>❌ Update Failed</h3>
-                    <p>${err.message}</p>
-                `;
-            } finally {
-                manageResultBox.style.display = 'block';
-                saveBtn.textContent = 'Save Changes';
-                saveBtn.classList.remove('loading');
             }
         });
     </script>

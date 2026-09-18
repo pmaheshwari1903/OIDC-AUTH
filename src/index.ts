@@ -38,10 +38,6 @@ app.get('/register', (req, res) => {
   res.sendFile(path.resolve('public/register.html'));
 });
 
-app.get('/manage-client', (req, res) => {
-  res.sendFile(path.resolve('public/register.html'));
-});
-
 app.get('/forgot-password', (req, res) => {
   res.sendFile(path.resolve('public/forgot-password.html'));
 });
