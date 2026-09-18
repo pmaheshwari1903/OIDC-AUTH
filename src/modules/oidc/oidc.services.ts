@@ -219,7 +219,9 @@ const userInfo = async (accessToken: string) => {
 
     let targetClientId: string | undefined = undefined;
     if (client_id) {
-        const [clientObj] = await db.select().from(clientsTable).where(eq(clientsTable.clientId, client_id));
+        const [clientObj] = await db.select().from(clientsTable).where(
+            or(eq(clientsTable.id, client_id), eq(clientsTable.clientId, client_id))
+        );
         targetClientId = clientObj?.id;
     }
 
@@ -272,18 +274,19 @@ const userInfo = async (accessToken: string) => {
         denialReason: denialReasons.length > 0 ? denialReasons.join("; ") : null
     });
 
-    // Build response with only the minimum claims for allowed scopes
+    // Build response with claims for allowed/requested scopes
     const response: any = {
         sub: user.id
     };
 
-    if (allowedScopes.has("profile")) {
+    if (allowedScopes.has("profile") || requestedScopesArray.includes("profile") || tokenPurpose === "authentication") {
         response.given_name = user.firstName;
         response.family_name = user.lastName;
+        response.name = `${user.firstName || ''} ${user.lastName || ''}`.trim();
         response.picture = user.profileImageUrl;
     }
 
-    if (allowedScopes.has("email")) {
+    if (allowedScopes.has("email") || requestedScopesArray.includes("email") || tokenPurpose === "authentication") {
         response.email = user.email;
     }
 
