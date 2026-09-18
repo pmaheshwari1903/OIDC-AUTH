@@ -217,6 +217,12 @@ const userInfo = async (accessToken: string) => {
     const { id: userId, client_id, scope, purpose } = payload;
     const tokenPurpose = purpose || "authentication";
 
+    let targetClientId: string | undefined = undefined;
+    if (client_id) {
+        const [clientObj] = await db.select().from(clientsTable).where(eq(clientsTable.clientId, client_id));
+        targetClientId = clientObj?.id;
+    }
+
     const requestedScopesArray = (scope || "").split(" ").filter(Boolean);
     const allowedScopes = new Set<string>();
     allowedScopes.add("openid"); // protocol scope is always allowed
@@ -228,16 +234,16 @@ const userInfo = async (accessToken: string) => {
         if (s === "openid") continue;
 
         // Check consent matching user + client + scope + purpose
-        const [consent] = await db.select().from(consentsTable).where(
+        const [consent] = targetClientId ? await db.select().from(consentsTable).where(
             and(
                 eq(consentsTable.userId, userId),
-                eq(consentsTable.clientId, client_id),
+                eq(consentsTable.clientId, targetClientId),
                 eq(consentsTable.scope, s),
                 eq(consentsTable.purpose, tokenPurpose as any),
                 eq(consentsTable.status, "granted"),
                 isNull(consentsTable.revokedAt)
             )
-        );
+        ) : [];
 
         if (consent && (!consent.expiresAt || consent.expiresAt > new Date())) {
             allowedScopes.add(s);
