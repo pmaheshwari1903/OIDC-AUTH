@@ -1,46 +1,47 @@
-import * as clientServices from "./clients.services.js"
-import ApiError from "../../common/utils/api-error.js"
-import ApiResponse from "../../common/utils/api-response.js"
-import { Request, Response } from 'express'
+import * as clientServices from "./clients.services.js";
+import { Request, Response } from 'express';
 
 const createClient = async (req: Request, res: Response) => {
     try {
-        const client = await clientServices.createClient(req.body)
+        const client = await clientServices.createClient(req.body);
         return res.status(201).json({
             message: "Client Created Successfully!",
             client
-        })
+        });
     } catch (error) {
-        console.error(error)
-        return res.status(500).json({ message: "Something went wrong" })
+        console.error(error);
+        return res.status(500).json({ message: "Something went wrong" });
     }
-}
+};
 
 const getClients = async (req: Request, res: Response) => {
     try {
-        const clients = await clientServices.getClients()
+        const clients = await clientServices.getClients();
         if (!clients.length) {
             return res.status(404).json({
                 message: "Client Not Found"
-            })
+            });
         }
-        return res.status(200).json(clients)
+        return res.status(200).json(clients);
     } catch (error) {
-        console.error(error)
-        return res.status(500).json({ message: "Something went wrong" })
+        console.error(error);
+        return res.status(500).json({ message: "Something went wrong" });
     }
-}
+};
 
 const getClientById = async (req: Request, res: Response) => {
     try {
-        const id = req.params.id as string;
-        const client = await clientServices.getClientById(id, {});
+        const identifier = (req.params.clientId || req.params.id) as string;
+        const client = await clientServices.getClientById(identifier);
         return res.status(200).json(client);
-    } catch (error) {
-        console.error(error)
-        return res.status(500).json({ message: "Something went wrong" })
+    } catch (error: any) {
+        console.error(error);
+        if (error.message === "Client Not Found") {
+            return res.status(404).json({ message: "Client Not Found" });
+        }
+        return res.status(500).json({ message: "Something went wrong" });
     }
-}
+};
 
 const getPublicClientDetails = async (req: Request, res: Response) => {
     try {
@@ -48,39 +49,53 @@ const getPublicClientDetails = async (req: Request, res: Response) => {
         const client = await clientServices.getPublicClientDetails(clientId);
         return res.status(200).json({ client });
     } catch (error) {
-        console.error(error)
-        return res.status(404).json({ message: "Client Not Found" })
+        console.error(error);
+        return res.status(404).json({ message: "Client Not Found" });
     }
-}
+};
 
 const updateClient = async (req: Request, res: Response) => {
     try {
-        const id = req.params.id as string;
-        const client = await clientServices.updateClient(id, req.body);
+        const identifier = (req.params.clientId || req.params.id) as string;
+        const client = await clientServices.updateClient(identifier, req.body);
         if (!client) {
-            return res.status(404).json({ message: "Client Not Found" })
+            return res.status(404).json({ message: "Client Not Found" });
         }
-        return res.status(200).json(client);
-    } catch (error) {
-        console.error(error)
-        return res.status(500).json({ message: "Something went wrong" })
+        return res.status(200).json({
+            message: "Client Updated Successfully!",
+            client,
+            id: client.id,
+            clientId: client.clientId,
+            applicationName: client.applicationName,
+            name: client.name,
+            redirectUri: client.redirectUri,
+            updatedAt: client.updatedAt
+        });
+    } catch (error: any) {
+        console.error(error);
+        if (error.message === "Client Not Found") {
+            return res.status(404).json({ message: "Client Not Found" });
+        }
+        return res.status(500).json({ message: "Something went wrong" });
     }
-}
+};
 
 const deleteClient = async (req: Request, res: Response) => {
     try {
-        const id = req.params.id as string
-        const deletedClient = await clientServices.deleteClient(id)
+        const identifier = (req.params.clientId || req.params.id) as string;
+        const deletedClient = await clientServices.deleteClient(identifier);
         return res.status(200).json({
             message: "Client Deleted Successfully!",
             client: deletedClient
         });
-    } catch (error) {
-        console.error(error)
-        return res.status(500).json({ message: "Something went wrong" })
+    } catch (error: any) {
+        console.error(error);
+        if (error.message === "Client Not Found") {
+            return res.status(404).json({ message: "Client Not Found" });
+        }
+        return res.status(500).json({ message: "Something went wrong" });
     }
-}
-
+};
 
 export {
     createClient,
@@ -89,4 +104,4 @@ export {
     updateClient,
     deleteClient,
     getPublicClientDetails
-}
+};

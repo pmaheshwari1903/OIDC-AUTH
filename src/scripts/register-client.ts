@@ -4,8 +4,15 @@ import crypto from 'node:crypto';
 import { generateSecretToken } from "../common/utils/jwt.utils.js";
 
 async function main() {
-    const name = "SRMPREPHUB";
-    const redirectUri = "http://localhost:5173/auth/callback";
+    const name = process.argv[2];
+    const redirectUri = process.argv[3];
+
+    if (!name || !redirectUri) {
+        console.error("Usage: node dist/scripts/register-client.js <name> <redirectUri>");
+        console.error("Example: node dist/scripts/register-client.js MyApp http://localhost:3000/auth/callback");
+        process.exit(1);
+    }
+
     const clientId = crypto.randomUUID();
     const { rawToken, hashedToken } = generateSecretToken();
 

@@ -38,6 +38,10 @@ app.get('/register', (req, res) => {
   res.sendFile(path.resolve('public/register.html'));
 });
 
+app.get('/manage-client', (req, res) => {
+  res.sendFile(path.resolve('public/register.html'));
+});
+
 app.get('/forgot-password', (req, res) => {
   res.sendFile(path.resolve('public/forgot-password.html'));
 });
@@ -60,6 +64,7 @@ app.get('/admin', (req, res) => {
 
 app.use('/api/auth', authRoute)
 app.use('/api', clientRoute)
+app.use('/', clientRoute)
 app.use('/api', consentsRoute)
 app.use('/api', dataAccessRoute)
 app.use('/api', adminRoute)
