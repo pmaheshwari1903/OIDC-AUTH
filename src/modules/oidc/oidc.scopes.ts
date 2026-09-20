@@ -1,6 +1,6 @@
 export const OIDC_SCOPES = {
     openid: [],
-    profile: ["given_name", "family_name", "picture"],
+    profile: ["given_name", "family_name", "name", "picture"],
     email: ["email"],
     location: ["city", "state", "country", "locale"],
     interests: ["interests"],

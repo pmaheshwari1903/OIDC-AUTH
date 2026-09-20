@@ -63,7 +63,7 @@ const authorize = async ({ client_id, redirect_uri, response_type, scope, state,
     // Default purpose to "authentication" if not provided
     const resolvedPurpose = purpose && SUPPORTED_PURPOSES.includes(purpose as any) ? purpose : "authentication";
 
-    const requestedScopes = scope.split(" ");
+    const requestedScopes = scope.split(" ").filter(Boolean);
     if (!requestedScopes.includes("openid")) {
         throw new Error("openid scope is required");
     }
@@ -74,19 +74,34 @@ const authorize = async ({ client_id, redirect_uri, response_type, scope, state,
         }
     }
 
-    // Check if consent already exists for this user + client + scope + purpose
-    const [existingConsent] = await db.select().from(consentsTable).where(
-        and(
-            eq(consentsTable.userId, userId),
-            eq(consentsTable.clientId, client.id),
-            eq(consentsTable.scope, scope),
-            eq(consentsTable.purpose, resolvedPurpose as any),
-            eq(consentsTable.status, "granted"),
-            isNull(consentsTable.revokedAt)
-        )
-    );
+    // Check if consent already exists for all non-openid scopes requested
+    const nonOpenIdScopes = requestedScopes.filter(s => s !== "openid");
+    let allConsentsExist = true;
 
-    if (!existingConsent) {
+    if (nonOpenIdScopes.length > 0) {
+        const activeConsents = await db.select().from(consentsTable).where(
+            and(
+                eq(consentsTable.userId, userId),
+                eq(consentsTable.clientId, client.id),
+                eq(consentsTable.purpose, resolvedPurpose as any),
+                eq(consentsTable.status, "granted"),
+                isNull(consentsTable.revokedAt)
+            )
+        );
+
+        for (const s of nonOpenIdScopes) {
+            const hasConsent = activeConsents.some(c => {
+                const cScopes = c.scope.split(" ");
+                return (cScopes.includes(s) || c.scope === s) && (!c.expiresAt || c.expiresAt > new Date());
+            });
+            if (!hasConsent) {
+                allConsentsExist = false;
+                break;
+            }
+        }
+    }
+
+    if (!allConsentsExist) {
         return {
             requiresConsent: true,
             redirectUri: undefined,
@@ -122,14 +137,54 @@ const saveConsent = async ({ client_id, userId, scope, redirect_uri, state, purp
     // Default purpose to "authentication" if not provided
     const resolvedPurpose = purpose && SUPPORTED_PURPOSES.includes(purpose as any) ? purpose : "authentication";
 
-    // Save consent with the specified purpose
-    await db.insert(consentsTable).values({
-        userId,
-        clientId: client.id,
-        scope,
-        purpose: resolvedPurpose as any,
-        status: "granted"
-    });
+    const requestedScopes = scope.split(" ").filter(Boolean);
+
+    // Save individual consent entry per scope
+    for (const s of requestedScopes) {
+        if (s === "openid") continue;
+
+        const [existing] = await db.select().from(consentsTable).where(
+            and(
+                eq(consentsTable.userId, userId),
+                eq(consentsTable.clientId, client.id),
+                eq(consentsTable.scope, s),
+                eq(consentsTable.purpose, resolvedPurpose as any),
+                eq(consentsTable.status, "granted"),
+                isNull(consentsTable.revokedAt)
+            )
+        );
+
+        if (!existing) {
+            await db.insert(consentsTable).values({
+                userId,
+                clientId: client.id,
+                scope: s,
+                purpose: resolvedPurpose as any,
+                status: "granted"
+            });
+        }
+    }
+
+    // Also record combined scope record if not present
+    const [existingFull] = await db.select().from(consentsTable).where(
+        and(
+            eq(consentsTable.userId, userId),
+            eq(consentsTable.clientId, client.id),
+            eq(consentsTable.scope, scope),
+            eq(consentsTable.purpose, resolvedPurpose as any),
+            eq(consentsTable.status, "granted"),
+            isNull(consentsTable.revokedAt)
+        )
+    );
+    if (!existingFull) {
+        await db.insert(consentsTable).values({
+            userId,
+            clientId: client.id,
+            scope,
+            purpose: resolvedPurpose as any,
+            status: "granted"
+        });
+    }
 
     const shortCode = await createAuthorizationCode({
         clientId: client.id,
@@ -232,30 +287,30 @@ const userInfo = async (accessToken: string) => {
     let anyDenied = false;
     const denialReasons: string[] = [];
 
+    // Fetch active granted consents for user + client + purpose
+    const activeConsents = targetClientId ? await db.select().from(consentsTable).where(
+        and(
+            eq(consentsTable.userId, userId),
+            eq(consentsTable.clientId, targetClientId),
+            eq(consentsTable.purpose, tokenPurpose as any),
+            eq(consentsTable.status, "granted"),
+            isNull(consentsTable.revokedAt)
+        )
+    ) : [];
+
     for (const s of requestedScopesArray) {
         if (s === "openid") continue;
 
-        // Check consent matching user + client + scope + purpose
-        const [consent] = targetClientId ? await db.select().from(consentsTable).where(
-            and(
-                eq(consentsTable.userId, userId),
-                eq(consentsTable.clientId, targetClientId),
-                eq(consentsTable.scope, s),
-                eq(consentsTable.purpose, tokenPurpose as any),
-                eq(consentsTable.status, "granted"),
-                isNull(consentsTable.revokedAt)
-            )
-        ) : [];
+        const consent = activeConsents.find(c => {
+            const consentScopes = c.scope.split(" ");
+            return (consentScopes.includes(s) || c.scope === s) && (!c.expiresAt || c.expiresAt > new Date());
+        });
 
-        if (consent && (!consent.expiresAt || consent.expiresAt > new Date())) {
+        if (consent) {
             allowedScopes.add(s);
         } else {
             anyDenied = true;
-            if (!consent) {
-                denialReasons.push(`Consent not granted for scope: ${s}`);
-            } else if (consent.expiresAt && consent.expiresAt <= new Date()) {
-                denialReasons.push(`Consent expired for scope: ${s}`);
-            }
+            denialReasons.push(`Consent not granted for scope: ${s}`);
         }
     }
 
@@ -274,19 +329,19 @@ const userInfo = async (accessToken: string) => {
         denialReason: denialReasons.length > 0 ? denialReasons.join("; ") : null
     });
 
-    // Build response with claims for allowed/requested scopes
+    // Build response with claims ONLY for allowed scopes
     const response: any = {
         sub: user.id
     };
 
-    if (allowedScopes.has("profile") || requestedScopesArray.includes("profile") || tokenPurpose === "authentication") {
+    if (allowedScopes.has("profile")) {
         response.given_name = user.firstName;
         response.family_name = user.lastName;
         response.name = `${user.firstName || ''} ${user.lastName || ''}`.trim();
         response.picture = user.profileImageUrl;
     }
 
-    if (allowedScopes.has("email") || requestedScopesArray.includes("email") || tokenPurpose === "authentication") {
+    if (allowedScopes.has("email")) {
         response.email = user.email;
     }
 
